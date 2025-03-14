@@ -1,0 +1,18 @@
+# Ignore binaries
+RadarSubsystem/radar_system
+ComputerSystem/computer_system
+
+# Ignore object files
+*.o
+*.a
+*.so
+
+# Ignore build directories (if using Make or CMake)
+build/
+bin/
+
+# Ignore VM-specific files and folders (adjust if needed)
+vm1
+vm1/
+.qnx_vm/
+.qnx_sdp/

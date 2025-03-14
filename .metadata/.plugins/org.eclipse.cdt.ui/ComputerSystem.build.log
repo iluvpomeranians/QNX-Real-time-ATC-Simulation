@@ -1,0 +1,6 @@
+00:54:07 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+
+00:54:07 Build Finished. 0 errors, 0 warnings. (took 161ms)
+
