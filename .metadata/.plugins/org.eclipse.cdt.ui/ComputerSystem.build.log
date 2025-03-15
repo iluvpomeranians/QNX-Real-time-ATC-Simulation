@@ -1,6 +1,7 @@
-00:54:07 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+14:50:56 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
 make -j8 all 
-make: Nothing to be done for 'all'.
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
 
-00:54:07 Build Finished. 0 errors, 0 warnings. (took 161ms)
+14:50:59 Build Finished. 0 errors, 0 warnings. (took 2s.661ms)
 

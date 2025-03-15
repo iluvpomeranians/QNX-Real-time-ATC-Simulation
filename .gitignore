@@ -12,7 +12,10 @@ build/
 bin/
 
 # Ignore VM-specific files and folders (adjust if needed)
+*vm*/
 vm1
 vm1/
+vm2/
 .qnx_vm/
 .qnx_sdp/
+/.metadata/

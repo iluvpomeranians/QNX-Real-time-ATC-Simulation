@@ -44,6 +44,16 @@ void fake_aircraft_data() {
     }
 }
 
+void verify_aircraft_data() {
+    std::cout << "Verifying shared memory contents...\n";
+    for (int i = 0; i < 10; i++) {
+        std::cout << "Aircraft ID: " << aircrafts[i].id
+                  << " Position: (" << aircrafts[i].x << ", " << aircrafts[i].y << ", " << aircrafts[i].z << ")"
+                  << " Speed: (" << aircrafts[i].speedX << ", " << aircrafts[i].speedY << ", " << aircrafts[i].speedZ << ")\n";
+    }
+    std::cout << "Verification complete.\n";
+}
+
 int main() {
 
     // create the shared mem
@@ -58,14 +68,18 @@ int main() {
             return 1;
         }
 
-    aircrafts = (AircraftData*) mmap(NULL, sizeof(AircraftData) * MAX_AIRCRAFT,
-                                     PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    aircrafts = (AircraftData*) mmap(NULL,
+    								sizeof(AircraftData) * MAX_AIRCRAFT,
+                                    PROT_READ | PROT_WRITE,
+									MAP_SHARED,
+									shm_fd, 0);
     if (aircrafts == MAP_FAILED) {
         perror("mmap failed");
         return 1;
     }
 
     fake_aircraft_data();
+    verify_aircraft_data();
 
     std::cout << "Radar System initialized. Shared memory ready.\n";
 

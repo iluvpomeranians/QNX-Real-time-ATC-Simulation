@@ -36,10 +36,15 @@ void* violationCheck(void* arg){//this void arg is required for pthread apparent
 		sleep(5);//Not sure - says we should update display every 5 sec
 		pthread_mutex_lock(&shm_mutex);
 
-		std::cout << "Checking for Safety Violations..." << std::endl;
+		std::cout << "\n\nChecking for Safety Violations..." << std::endl;
 
 		for (int i = 0; i < MAX_AIRCRAFT; i++){
+			if (aircrafts[i].id == 0) {continue;}
+
 			for (int j = i + 1; j < MAX_AIRCRAFT; j++){
+
+				if (aircrafts[j].id == 0) {continue;}
+
 				double dx = std::fabs(aircrafts[i].x - aircrafts[j].x);
 				double dy = std::fabs(aircrafts[i].y - aircrafts[j].y);
 				double dz = std::fabs(aircrafts[i].z - aircrafts[j].z);
@@ -72,7 +77,7 @@ int main() {
 		return 1;
 	}
 
-	aircrafts = (AircraftData*) mmap(0,
+	aircrafts = (AircraftData*) mmap(NULL,
 									sizeof(AircraftData) * MAX_AIRCRAFT,
 									PROT_READ | PROT_WRITE,
 									MAP_SHARED,
