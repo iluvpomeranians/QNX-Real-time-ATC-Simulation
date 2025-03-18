@@ -10,10 +10,35 @@
 #include "../../DataTypes/aircraft.h"
 #include "RadarSubsystem.h"
 
+AircraftData* RadarSubsystem::aircrafts_shared_memory = nullptr;
+int shm_fd;
 
-RadarSubsystem::RadarSubsystem(){
-	std::cout<<"Init RadarSubsystem" << std::endl;
-	fake_aircraft_data();
+RadarSubsystem::RadarSubsystem() {
+    std::cout << "Init RadarSubsystem" << std::endl;
+
+    shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
+    if (shm_fd == -1) {
+        perror("shm_open failed");
+        exit(1);
+    }
+
+    if (ftruncate(shm_fd, sizeof(AircraftData) * MAX_AIRCRAFT) == -1) {
+        perror("ftruncate failed");
+        exit(1);
+    }
+
+    RadarSubsystem::aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+                                                   sizeof(AircraftData) * MAX_AIRCRAFT,
+                                                   PROT_READ | PROT_WRITE,
+                                                   MAP_SHARED,
+                                                   shm_fd, 0);
+
+    if (RadarSubsystem::aircrafts_shared_memory == MAP_FAILED) {
+        perror("mmap failed");
+        exit(1);
+    }
+
+    fake_aircraft_data();
 }
 
 void RadarSubsystem::fake_aircraft_data() {
@@ -43,7 +68,8 @@ void RadarSubsystem::fake_aircraft_data() {
 										   fakeData[i].z,
 										   fakeData[i].speedX,
 										   fakeData[i].speedY,
-										   fakeData[i].speedZ);
+										   fakeData[i].speedZ,
+										   RadarSubsystem::aircrafts_shared_memory);
 
     	aircraft->startThreads();
     	all_aircrafts[fakeData[i].id] = aircraft;
@@ -59,12 +85,12 @@ void RadarSubsystem::verify_aircraft_data() {
     for (auto& pair : all_aircrafts) {
             Aircraft* aircraft = pair.second;
             std::cout << "Aircraft ID: " << aircraft->id
-                      << " Position: (" << aircrafts_shared_memory[aircraft->id].x
-                      << ", " << aircrafts_shared_memory[aircraft->id].y
-                      << ", " << aircrafts_shared_memory[aircraft->id].z << ")"
-                      << " Speed: (" << aircrafts_shared_memory[aircraft->id].speedX
-                      << ", " << aircrafts_shared_memory[aircraft->id].speedY
-                      << ", " << aircrafts_shared_memory[aircraft->id].speedZ << ")\n";
+                      << " Position: (" << RadarSubsystem::aircrafts_shared_memory[aircraft->id].x
+                      << ", " << RadarSubsystem::aircrafts_shared_memory[aircraft->id].y
+                      << ", " << RadarSubsystem::aircrafts_shared_memory[aircraft->id].z << ")"
+                      << " Speed: (" << RadarSubsystem::aircrafts_shared_memory[aircraft->id].speedX
+                      << ", " << RadarSubsystem::aircrafts_shared_memory[aircraft->id].speedY
+                      << ", " << RadarSubsystem::aircrafts_shared_memory[aircraft->id].speedZ << ")\n";
     }
     std::cout << "Verification complete.\n";
 }
@@ -80,6 +106,11 @@ RadarSubsystem::~RadarSubsystem(){
 	        pair.second->stopThreads();
 	        delete pair.second;
 	}
+
+    munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+    close(shm_fd);
+    //shm_unlink(SHM_NAME);
+    std::cout << "Radar shutdown complete." << std::endl;
 }
 
 int main() {
@@ -103,13 +134,13 @@ int main() {
             return 1;
         }
 
-    aircrafts_shared_memory = (AircraftData*) mmap(NULL,
-    								sizeof(AircraftData) * MAX_AIRCRAFT,
-                                    PROT_READ | PROT_WRITE,
-									MAP_SHARED,
-									shm_fd, 0);
+    RadarSubsystem::aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+												sizeof(AircraftData) * MAX_AIRCRAFT,
+												PROT_READ | PROT_WRITE,
+												MAP_SHARED,
+												shm_fd, 0);
 
-    if (aircrafts_shared_memory == MAP_FAILED) {
+    if (RadarSubsystem::aircrafts_shared_memory == MAP_FAILED) {
         perror("mmap failed");
         return 1;
     }
@@ -117,12 +148,12 @@ int main() {
     RadarSubsystem radar;
     sleep(1);
     radar.verify_aircraft_data();
-    std::cout << "[DEBUG] Shared Memory Base Address: " << aircrafts_shared_memory << std::endl;
+    std::cout << "[DEBUG] Shared Memory Base Address: " << RadarSubsystem::aircrafts_shared_memory << std::endl;
     std::cout << "Radar System initialized. Shared memory ready.\n";
 
     while (true) sleep(10);
 
-    munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+    munmap(RadarSubsystem::aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
     close(shm_fd);
 
     return 0;

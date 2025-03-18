@@ -11,11 +11,12 @@
 #include <sys/dispatch.h>
 #include <mutex>
 
-extern AircraftData* aircrafts_shared_memory;
-
 class Aircraft {
-public:
 
+private:
+	static AircraftData* shared_memory;
+
+public:
 	int id;
 	double speedX, speedY, speedZ;
 	bool running;
@@ -29,16 +30,17 @@ public:
 			 double z,
 			 double speedX,
 			 double speedY,
-			 double speedZ);
+			 double speedZ,
+			 AircraftData* shared_mem);
 
 	~Aircraft();
 
 	void startThreads();
 	void stopThreads();
 
-private:
 	static void* updatePositionThread(void* arg);
 	static void* messageHandlerThread(void* arg);
+
 };
 
 

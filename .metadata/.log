@@ -5221,3 +5221,69 @@ java.net.SocketTimeoutException: Read timed out
 	at com.qnx.tools.ide.target.qconn.internal.core.QconnSysInfoProvider.refresh(QconnSysInfoProvider.java:141)
 	at com.qnx.tools.ide.target.internal.core.model.TargetRefreshRequest$LiveRefreshJob.run(TargetRefreshRequest.java:149)
 	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+
+!ENTRY com.qnx.tools.ide.target.qconn.core 4 -1 2025-03-18 14:25:50.272
+!MESSAGE Error logged from Target Core: 
+!STACK 0
+java.net.SocketTimeoutException: Read timed out
+	at java.base/java.net.SocketInputStream.socketRead0(Native Method)
+	at java.base/java.net.SocketInputStream.socketRead(Unknown Source)
+	at java.base/java.net.SocketInputStream.read(Unknown Source)
+	at java.base/java.net.SocketInputStream.read(Unknown Source)
+	at java.base/java.io.DataInputStream.readFully(Unknown Source)
+	at java.base/java.io.DataInputStream.readFully(Unknown Source)
+	at com.qnx.tools.ide.utils.target.EDataInputStream.readIntE(EDataInputStream.java:43)
+	at com.qnx.tools.ide.utils.target.TargetServiceSysInfo$SystemInfoMsgGetPids.fill(TargetServiceSysInfo.java:388)
+	at com.qnx.tools.ide.utils.target.TargetServiceSysInfo.getProcessesInfo(TargetServiceSysInfo.java:712)
+	at com.qnx.tools.ide.target.qconn.internal.core.QconnSysInfoProvider.refresh(QconnSysInfoProvider.java:141)
+	at com.qnx.tools.ide.target.internal.core.model.TargetRefreshRequest$LiveRefreshJob.run(TargetRefreshRequest.java:149)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+
+!ENTRY org.eclipse.debug.core 4 5010 2025-03-18 14:29:22.714
+!MESSAGE Terminate failed
+
+!ENTRY org.eclipse.debug.core 4 125 2025-03-18 14:29:39.272
+!MESSAGE Error logged from Debug Core: 
+!STACK 0
+java.net.SocketException: Socket closed
+	at java.base/java.net.SocketInputStream.socketRead0(Native Method)
+	at java.base/java.net.SocketInputStream.socketRead(Unknown Source)
+	at java.base/java.net.SocketInputStream.read(Unknown Source)
+	at java.base/java.net.SocketInputStream.read(Unknown Source)
+	at java.base/java.io.DataInputStream.read(Unknown Source)
+	at com.qnx.tools.ide.utils.target.TargetProcess$InputStreamWrapper.read(TargetProcess.java:227)
+	at java.base/java.io.BufferedInputStream.read1(Unknown Source)
+	at java.base/java.io.BufferedInputStream.read(Unknown Source)
+	at java.base/java.io.FilterInputStream.read(Unknown Source)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor.internalRead(OutputStreamMonitor.java:252)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor.read(OutputStreamMonitor.java:228)
+	at java.base/java.lang.Thread.run(Unknown Source)
+
+!ENTRY com.qnx.tools.ide.qde.debug.core 4 0 2025-03-18 14:29:39.432
+!MESSAGE Launch cleaning error
+!SUBENTRY 1 com.qnx.tools.ide.qde.debug.core 4 0 2025-03-18 14:29:39.432
+!MESSAGE Attempt to delete remote file failed:
+!STACK 0
+com.qnx.tools.ide.utils.target.RemoteIOException: Remove /tmp/RadarSubsystem: No such file or directory
+	at com.qnx.tools.ide.utils.target.TargetServiceFile.rm(TargetServiceFile.java:345)
+	at com.qnx.tools.ide.utils.target.TargetServiceFile.rm(TargetServiceFile.java:333)
+	at com.qnx.tools.ide.qde.debug.internal.core.dsf.QDELaunch.cleanRemoteFiles(QDELaunch.java:769)
+	at com.qnx.tools.ide.qde.debug.internal.core.dsf.QDELaunch.cleanup(QDELaunch.java:175)
+	at com.qnx.tools.ide.qde.debug.internal.core.dsf.QDELaunch.terminate(QDELaunch.java:407)
+	at org.eclipse.launchbar.ui.internal.commands.StopActiveCommandHandler$1.run(StopActiveCommandHandler.java:62)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+
+!ENTRY com.qnx.tools.ide.target.qconn.core 4 -1 2025-03-18 14:29:39.436
+!MESSAGE Error logged from Target Core: 
+!STACK 0
+java.net.SocketException: Connection reset
+	at java.base/java.net.SocketInputStream.read(Unknown Source)
+	at java.base/java.net.SocketInputStream.read(Unknown Source)
+	at java.base/java.io.DataInputStream.readFully(Unknown Source)
+	at java.base/java.io.DataInputStream.readFully(Unknown Source)
+	at com.qnx.tools.ide.utils.target.EDataInputStream.readIntE(EDataInputStream.java:43)
+	at com.qnx.tools.ide.utils.target.TargetServiceSysInfo$SystemInfoMsgGetPids.fill(TargetServiceSysInfo.java:388)
+	at com.qnx.tools.ide.utils.target.TargetServiceSysInfo.getProcessesInfo(TargetServiceSysInfo.java:712)
+	at com.qnx.tools.ide.target.qconn.internal.core.QconnSysInfoProvider.refresh(QconnSysInfoProvider.java:141)
+	at com.qnx.tools.ide.target.internal.core.model.TargetRefreshRequest$LiveRefreshJob.run(TargetRefreshRequest.java:149)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)

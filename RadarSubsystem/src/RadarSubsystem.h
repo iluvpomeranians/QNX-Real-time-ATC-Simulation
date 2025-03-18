@@ -16,6 +16,8 @@ private:
 	std::unordered_map<int, Aircraft*> all_aircrafts;
 
 public:
+	static AircraftData* aircrafts_shared_memory;
+
 	RadarSubsystem();
 	~RadarSubsystem();
 

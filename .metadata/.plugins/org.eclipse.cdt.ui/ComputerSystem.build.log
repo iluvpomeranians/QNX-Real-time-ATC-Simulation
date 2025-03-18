@@ -1,6 +1,6 @@
-13:20:09 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
-make -j8 clean 
-rm -fr build/x86_64-debug
+14:32:49 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
 
-13:20:09 Build Finished. 0 errors, 0 warnings. (took 329ms)
+14:32:49 Build Finished. 0 errors, 0 warnings. (took 128ms)
 

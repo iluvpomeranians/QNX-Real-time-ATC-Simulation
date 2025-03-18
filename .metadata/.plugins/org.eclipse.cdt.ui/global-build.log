@@ -3990,3 +3990,667 @@ make: *** No rule to make target 'clean'.  Stop.
 13:20:09 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
 make -j8 clean 
 rm -fr build/x86_64-debug
+13:40:02 **** Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+13:40:10 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+src/RadarSubsystem.cpp: In member function 'void RadarSubsystem::fake_aircraft_data()':
+src/RadarSubsystem.cpp:75:32: error: no matching function for call to 'Aircraft::Aircraft(int&, double&, double&, double&, double&, double&, double&)'
+              fakeData[i].speedZ);
+                                ^
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:29:2: note: candidate: 'Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)'
+  Aircraft(int id,
+  ^~~~~~~~
+src/../../DataTypes/aircraft.h:29:2: note:   candidate expects 8 arguments, 7 provided
+src/RadarSubsystem.cpp: In member function 'void RadarSubsystem::verify_aircraft_data()':
+src/RadarSubsystem.cpp:90:55: error: 'int Aircraft::id' is private within this context
+             std::cout << "Aircraft ID: " << aircraft->id
+                                                       ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:91:78: error: 'int Aircraft::id' is private within this context
+                       << " Position: (" << aircrafts_shared_memory[aircraft->id].x
+                                                                              ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:92:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].y
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:93:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].z << ")"
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:94:75: error: 'int Aircraft::id' is private within this context
+                       << " Speed: (" << aircrafts_shared_memory[aircraft->id].speedX
+                                                                           ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:95:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].speedY
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:96:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].speedZ << ")\n";
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:41:08 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In member function 'void RadarSubsystem::verify_aircraft_data()':
+src/RadarSubsystem.cpp:91:55: error: 'int Aircraft::id' is private within this context
+             std::cout << "Aircraft ID: " << aircraft->id
+                                                       ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:92:78: error: 'int Aircraft::id' is private within this context
+                       << " Position: (" << aircrafts_shared_memory[aircraft->id].x
+                                                                              ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:93:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].y
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:94:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].z << ")"
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:95:75: error: 'int Aircraft::id' is private within this context
+                       << " Speed: (" << aircrafts_shared_memory[aircraft->id].speedX
+                                                                           ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:96:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].speedY
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+src/RadarSubsystem.cpp:97:68: error: 'int Aircraft::id' is private within this context
+                       << ", " << aircrafts_shared_memory[aircraft->id].speedZ << ")\n";
+                                                                    ^~
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:19:6: note: declared private here
+  int id;
+      ^~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:41:47 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/src/RadarSubsystem.o: in function `main':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/src/RadarSubsystem.cpp:141: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/src/RadarSubsystem.cpp:147: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/src/RadarSubsystem.cpp:155: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:22: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:26: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o:C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:26: more undefined references to `aircrafts_shared_memory' follow
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/bin/x86_64-pc-nto-qnx7.1.0-ld caught signal 1
+make: *** [build/x86_64-debug/RadarSubsystem] Error 1
+Makefile:53: recipe for target 'build/x86_64-debug/RadarSubsystem' failed
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:43:04 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/src/RadarSubsystem.o: in function `main':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/src/RadarSubsystem.cpp:141: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/src/RadarSubsystem.cpp:147: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/src/RadarSubsystem.cpp:155: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:22: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:26: undefined reference to `aircrafts_shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o:C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:26: more undefined references to `aircrafts_shared_memory' follow
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/bin/x86_64-pc-nto-qnx7.1.0-ld caught signal 1
+Makefile:53: recipe for target 'build/x86_64-debug/RadarSubsystem' failed
+make: *** [build/x86_64-debug/RadarSubsystem] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:47:12 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:47:12 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+13:47:12 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:47:15 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+../DataTypes/aircraft.cpp: In constructor 'Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)':
+../DataTypes/aircraft.cpp:22:2: error: 'aircrafts_shared_memory' was not declared in this scope
+  aircrafts_shared_memory[id] = {id, x, y, z, speedX, speedY, speedZ, true, true};
+  ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:22:2: note: suggested alternative: 'shared_memory'
+  aircrafts_shared_memory[id] = {id, x, y, z, speedX, speedY, speedZ, true, true};
+  ^~~~~~~~~~~~~~~~~~~~~~~
+  shared_memory
+../DataTypes/aircraft.cpp: In static member function 'static void* Aircraft::updatePositionThread(void*)':
+../DataTypes/aircraft.cpp:36:3: error: 'aircrafts_shared_memory' was not declared in this scope
+   aircrafts_shared_memory[aircraft->id].x += aircraft->speedX;
+   ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:36:3: note: suggested alternative: 'shared_memory'
+   aircrafts_shared_memory[aircraft->id].x += aircraft->speedX;
+   ^~~~~~~~~~~~~~~~~~~~~~~
+   shared_memory
+../DataTypes/aircraft.cpp: In destructor 'Aircraft::~Aircraft()':
+../DataTypes/aircraft.cpp:104:6: error: 'aircrafts_shared_memory' was not declared in this scope
+  if (aircrafts_shared_memory){
+      ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:104:6: note: suggested alternative: 'shared_memory'
+  if (aircrafts_shared_memory){
+      ^~~~~~~~~~~~~~~~~~~~~~~
+      shared_memory
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+make: *** [build/x86_64-debug/../DataTypes/aircraft.o] Error 1
+Makefile:48: recipe for target 'build/x86_64-debug/../DataTypes/aircraft.o' failed
+make: *** Waiting for unfinished jobs....
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:48:10 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+../DataTypes/aircraft.cpp: In constructor 'Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)':
+../DataTypes/aircraft.cpp:25:34: error: 'aircrafts_shared_memory' was not declared in this scope
+            << " Stored at: " << &aircrafts_shared_memory[id]
+                                  ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:25:34: note: suggested alternative: 'shared_memory'
+            << " Stored at: " << &aircrafts_shared_memory[id]
+                                  ^~~~~~~~~~~~~~~~~~~~~~~
+                                  shared_memory
+../DataTypes/aircraft.cpp: In static member function 'static void* Aircraft::updatePositionThread(void*)':
+../DataTypes/aircraft.cpp:36:3: error: invalid use of member 'Aircraft::shared_memory' in static member function
+   shared_memory[aircraft->id].x += aircraft->speedX;
+   ^~~~~~~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:26:16: note: declared here
+  AircraftData* shared_memory;
+                ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:37:3: error: invalid use of member 'Aircraft::shared_memory' in static member function
+   shared_memory[aircraft->id].y += aircraft->speedY;
+   ^~~~~~~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:26:16: note: declared here
+  AircraftData* shared_memory;
+                ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:38:3: error: invalid use of member 'Aircraft::shared_memory' in static member function
+   shared_memory[aircraft->id].z += aircraft->speedZ;
+   ^~~~~~~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:26:16: note: declared here
+  AircraftData* shared_memory;
+                ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp: In destructor 'Aircraft::~Aircraft()':
+../DataTypes/aircraft.cpp:105:10: error: 'aircrafts_shared_memory' was not declared in this scope
+   munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+          ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:105:10: note: suggested alternative: 'shared_memory'
+   munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+          ^~~~~~~~~~~~~~~~~~~~~~~
+          shared_memory
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/../DataTypes/aircraft.o' failed
+make: *** [build/x86_64-debug/../DataTypes/aircraft.o] Error 1
+make: *** Waiting for unfinished jobs....
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:48:30 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:48:30 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+13:48:30 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:48:32 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+../DataTypes/aircraft.cpp: In static member function 'static void* Aircraft::updatePositionThread(void*)':
+../DataTypes/aircraft.cpp:36:3: error: invalid use of member 'Aircraft::shared_memory' in static member function
+   shared_memory[aircraft->id].x += aircraft->speedX;
+   ^~~~~~~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:26:16: note: declared here
+  AircraftData* shared_memory;
+                ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:37:3: error: invalid use of member 'Aircraft::shared_memory' in static member function
+   shared_memory[aircraft->id].y += aircraft->speedY;
+   ^~~~~~~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:26:16: note: declared here
+  AircraftData* shared_memory;
+                ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:38:3: error: invalid use of member 'Aircraft::shared_memory' in static member function
+   shared_memory[aircraft->id].z += aircraft->speedZ;
+   ^~~~~~~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:26:16: note: declared here
+  AircraftData* shared_memory;
+                ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp: In destructor 'Aircraft::~Aircraft()':
+../DataTypes/aircraft.cpp:105:10: error: 'aircrafts_shared_memory' was not declared in this scope
+   munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+          ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:105:10: note: suggested alternative: 'shared_memory'
+   munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+          ^~~~~~~~~~~~~~~~~~~~~~~
+          shared_memory
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/../DataTypes/aircraft.o' failed
+make: *** [build/x86_64-debug/../DataTypes/aircraft.o] Error 1
+make: *** Waiting for unfinished jobs....
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:50:32 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+../DataTypes/aircraft.cpp: In constructor 'Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)':
+../DataTypes/aircraft.cpp:18:12: error: 'AircraftData* Aircraft::shared_memory' is a static data member; it can only be initialized at its definition
+            shared_memory(shared_mem){
+            ^~~~~~~~~~~~~
+../DataTypes/aircraft.cpp: In destructor 'Aircraft::~Aircraft()':
+../DataTypes/aircraft.cpp:105:10: error: 'aircrafts_shared_memory' was not declared in this scope
+   munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+          ^~~~~~~~~~~~~~~~~~~~~~~
+../DataTypes/aircraft.cpp:105:10: note: suggested alternative: 'shared_memory'
+   munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+          ^~~~~~~~~~~~~~~~~~~~~~~
+          shared_memory
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+make: *** [build/x86_64-debug/../DataTypes/aircraft.o] Error 1
+make: *** Waiting for unfinished jobs....
+Makefile:48: recipe for target 'build/x86_64-debug/../DataTypes/aircraft.o' failed
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:54:05 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:54:05 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+13:54:05 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:54:45 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:14:15: error: 'Aircraft' has not been declared
+ AircraftData* Aircraft::shared_memory = nullptr;
+               ^~~~~~~~
+../DataTypes/aircraft.cpp:3:1: error: no declaration matches 'Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)'
+ Aircraft::Aircraft(int id,
+ ^~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:16:7: note: candidates are: 'Aircraft::Aircraft(const Aircraft&)'
+ class Aircraft {
+       ^~~~~~~~
+../DataTypes/aircraft.h:29:2: note:                 'Aircraft::Aircraft(int, double, double, double, double, double, double)'
+  Aircraft(int id,
+  ^~~~~~~~
+../DataTypes/aircraft.h:16:7: note: 'class Aircraft' defined here
+ class Aircraft {
+       ^~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/../DataTypes/aircraft.o' failed
+make: *** [build/x86_64-debug/../DataTypes/aircraft.o] Error 1
+make: *** Waiting for unfinished jobs....
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:14:15: error: 'Aircraft' has not been declared
+ AircraftData* Aircraft::shared_memory = nullptr;
+               ^~~~~~~~
+src/RadarSubsystem.cpp: In member function 'void RadarSubsystem::fake_aircraft_data()':
+src/RadarSubsystem.cpp:76:37: error: no matching function for call to 'Aircraft::Aircraft(int&, double&, double&, double&, double&, double&, double&, AircraftData*&)'
+              aircrafts_shared_memory);
+                                     ^
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:29:2: note: candidate: 'Aircraft::Aircraft(int, double, double, double, double, double, double)'
+  Aircraft(int id,
+  ^~~~~~~~
+src/../../DataTypes/aircraft.h:29:2: note:   candidate expects 7 arguments, 8 provided
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+src/RadarSubsystem.cpp:141:5: note: suggested alternative: 'shared_memory'
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+     shared_memory
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:56:30 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+../DataTypes/aircraft.cpp:3:1: error: no declaration matches 'Aircraft::Aircraft(int, double, double, double, double, double, double, AircraftData*)'
+ Aircraft::Aircraft(int id,
+ ^~~~~~~~
+In file included from ../DataTypes/aircraft.cpp:1:
+../DataTypes/aircraft.h:14:7: note: candidates are: 'Aircraft::Aircraft(const Aircraft&)'
+ class Aircraft {
+       ^~~~~~~~
+../DataTypes/aircraft.h:28:2: note:                 'Aircraft::Aircraft(int, double, double, double, double, double, double)'
+  Aircraft(int id,
+  ^~~~~~~~
+../DataTypes/aircraft.h:14:7: note: 'class Aircraft' defined here
+ class Aircraft {
+       ^~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/../DataTypes/aircraft.o' failed
+make: *** [build/x86_64-debug/../DataTypes/aircraft.o] Error 1
+make: *** Waiting for unfinished jobs....
+src/RadarSubsystem.cpp: In member function 'void RadarSubsystem::fake_aircraft_data()':
+src/RadarSubsystem.cpp:76:37: error: no matching function for call to 'Aircraft::Aircraft(int&, double&, double&, double&, double&, double&, double&, AircraftData*&)'
+              aircrafts_shared_memory);
+                                     ^
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:28:2: note: candidate: 'Aircraft::Aircraft(int, double, double, double, double, double, double)'
+  Aircraft(int id,
+  ^~~~~~~~
+src/../../DataTypes/aircraft.h:28:2: note:   candidate expects 7 arguments, 8 provided
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:56:45 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+src/RadarSubsystem.cpp: In member function 'void RadarSubsystem::fake_aircraft_data()':
+src/RadarSubsystem.cpp:76:37: error: no matching function for call to 'Aircraft::Aircraft(int&, double&, double&, double&, double&, double&, double&, AircraftData*&)'
+              aircrafts_shared_memory);
+                                     ^
+In file included from src/RadarSubsystem.cpp:10:
+src/../../DataTypes/aircraft.h:28:2: note: candidate: 'Aircraft::Aircraft(int, double, double, double, double, double, double)'
+  Aircraft(int id,
+  ^~~~~~~~
+src/../../DataTypes/aircraft.h:28:2: note:   candidate expects 7 arguments, 8 provided
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:141:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+13:57:06 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:57:06 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+13:57:06 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+13:57:08 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:140:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:02:26 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:02:26 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+14:02:26 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:02:28 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:136:5: error: 'aircrafts_shared_memory' was not declared in this scope
+     aircrafts_shared_memory = (AircraftData*) mmap(NULL,
+     ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:05:08 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:05:08 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+14:05:08 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:07:19 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:150:60: error: 'aircrafts_shared_memory' was not declared in this scope
+     std::cout << "[DEBUG] Shared Memory Base Address: " << aircrafts_shared_memory << std::endl;
+                                                            ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:08:39 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:150:60: error: 'aircrafts_shared_memory' was not declared in this scope
+     std::cout << "[DEBUG] Shared Memory Base Address: " << aircrafts_shared_memory << std::endl;
+                                                            ^~~~~~~~~~~~~~~~~~~~~~~
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:08:51 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::Aircraft(int, double, double, double, double, double, double)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:21: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:25: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:25: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::updatePositionThread(void*)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:35: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:35: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o:C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:36: more undefined references to `Aircraft::shared_memory' follow
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/bin/x86_64-pc-nto-qnx7.1.0-ld caught signal 1
+Makefile:53: recipe for target 'build/x86_64-debug/RadarSubsystem' failed
+make: *** [build/x86_64-debug/RadarSubsystem] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:10:25 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::Aircraft(int, double, double, double, double, double, double)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:21: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:25: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:25: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::updatePositionThread(void*)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:35: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:35: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o:C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:36: more undefined references to `Aircraft::shared_memory' follow
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/bin/x86_64-pc-nto-qnx7.1.0-ld caught signal 1
+Makefile:53: recipe for target 'build/x86_64-debug/RadarSubsystem' failed
+make: *** [build/x86_64-debug/RadarSubsystem] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:10:31 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:10:31 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+14:10:31 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:10:33 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::Aircraft(int, double, double, double, double, double, double)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:21: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:25: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:25: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o: in function `Aircraft::updatePositionThread(void*)':
+C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:35: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:35: undefined reference to `Aircraft::shared_memory'
+C:\Users\david\qnx710\host\win64\x86_64\usr\bin\x86_64-pc-nto-qnx7.1.0-ld: build/x86_64-debug/../DataTypes/aircraft.o:C:\Users\david\Desktop\Coen320\ATC_Project\RadarSubsystem/../DataTypes/aircraft.cpp:36: more undefined references to `Aircraft::shared_memory' follow
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/bin/x86_64-pc-nto-qnx7.1.0-ld caught signal 1
+Makefile:53: recipe for target 'build/x86_64-debug/RadarSubsystem' failed
+make: *** [build/x86_64-debug/RadarSubsystem] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+14:12:36 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:12:36 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+14:12:36 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+14:12:38 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:22:59 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:23:06 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:23:29 **** Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+14:29:11 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:29:17 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:29:39 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:29:48 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:29:59 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:30:10 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:31:05 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:31:27 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:32:37 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:32:42 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:32:49 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
