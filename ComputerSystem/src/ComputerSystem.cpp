@@ -21,6 +21,8 @@ void sendIdToDisplay(int aircraft_id) {
 }
 
 void* violationCheck(void* arg) {
+	// Calculate shared memory limits
+	void* upper_limit = (void*)((char*)aircrafts_shared_memory + sizeof(AircraftData) * MAX_AIRCRAFT);
     while (1) {
         sleep(5);
         pthread_mutex_lock(&shm_mutex);
@@ -35,7 +37,11 @@ void* violationCheck(void* arg) {
 //                  << reinterpret_cast<void*>(base_address) << " to "
 //                  << reinterpret_cast<void*>(end_address) << std::endl;
 
-        for (int i = 100; i < 112; i++) {
+        for (int i = 0; i < 220; i++) {
+        	// Check if we're within the bounds of shared memory
+        	if ((void*)&aircrafts_shared_memory[i] >= upper_limit) {
+        	    continue;
+        	}
             AircraftData* aircraft1 = &aircrafts_shared_memory[i];
 
             if (aircraft1 == nullptr || aircraft1->id == 0) continue;
