@@ -19,7 +19,9 @@ Aircraft::Aircraft(int id,
 								   ipc_thread(0)
 								   {
 
-	Aircraft::shared_memory = shared_mem;
+	if (Aircraft::shared_memory == nullptr){Aircraft::shared_memory = shared_mem;}
+
+	std::cout << "[Aircraft] Using Shared Memory Address: " << Aircraft::shared_memory << std::endl;
 
 	Aircraft::shared_memory[id] = {id, x, y, z, speedX, speedY, speedZ, true, true};
 

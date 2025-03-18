@@ -1,7 +1,6 @@
-14:32:42 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+16:21:50 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
 make -j8 all 
-q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
-q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+make: Nothing to be done for 'all'.
 
-14:32:43 Build Finished. 0 errors, 0 warnings. (took 727ms)
+16:21:50 Build Finished. 0 errors, 0 warnings. (took 128ms)
 

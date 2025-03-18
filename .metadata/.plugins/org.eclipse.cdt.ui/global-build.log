@@ -4654,3 +4654,241 @@ q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debu
 14:32:49 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
 make -j8 all 
 make: Nothing to be done for 'all'.
+14:43:00 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:43:19 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:47:06 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:47:18 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:50:05 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+14:51:35 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+14:51:57 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:57:06 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:57:20 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+14:59:01 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:00:38 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:05:37 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:05:48 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+15:08:19 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:11:14 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:25:43 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/../DataTypes/aircraft.d,-MT,build/x86_64-debug/../DataTypes/aircraft.o -o build/x86_64-debug/../DataTypes/aircraft.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  ../DataTypes/aircraft.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:27:24 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:30:08 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+15:31:20 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+15:32:15 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:33:13 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:34:34 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+15:34:34 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+15:34:34 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+15:35:31 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:35:58 **** Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+15:40:40 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:40:48 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:43:47 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In destructor 'RadarSubsystem::~RadarSubsystem()':
+src/RadarSubsystem.cpp:102:13: warning: unused variable 'pair' [-Wunused-variable]
+  for (auto& pair : all_aircrafts) {
+             ^~~~
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:43:55 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:44:37 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:48:23 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+src/RadarSubsystem.cpp: In function 'int main()':
+src/RadarSubsystem.cpp:142:2: error: 'fake_aircraft_data' was not declared in this scope
+  fake_aircraft_data();
+  ^~~~~~~~~~~~~~~~~~
+src/RadarSubsystem.cpp:142:2: note: suggested alternative: 'request_aircraft_data'
+  fake_aircraft_data();
+  ^~~~~~~~~~~~~~~~~~
+  request_aircraft_data
+src/RadarSubsystem.cpp:144:5: error: 'radar' was not declared in this scope
+     radar.verify_aircraft_data();
+     ^~~~~
+src/RadarSubsystem.cpp:144:5: note: suggested alternative: 'rand_r'
+     radar.verify_aircraft_data();
+     ^~~~~
+     rand_r
+cc: C:/Users/david/qnx710/host/win64/x86_64/usr/lib/gcc/x86_64-pc-nto-qnx7.1.0/8.3.0/cc1plus caught signal 1
+Makefile:48: recipe for target 'build/x86_64-debug/src/RadarSubsystem.o' failed
+make: *** [build/x86_64-debug/src/RadarSubsystem.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+15:50:08 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+15:50:08 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+15:50:08 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+15:50:10 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:50:25 **** Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+15:53:03 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:53:16 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+15:59:40 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+15:59:49 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:01:03 **** Clean-only build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+16:01:03 **** Clean-only build of configuration x86_64-debug for project DataTypes ****
+make -j8 clean 
+make: *** No rule to make target 'clean'.  Stop.
+"make -j8 clean" terminated with exit code 2. Build might be incomplete.
+16:01:04 **** Clean-only build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 clean 
+rm -fr build/x86_64-debug
+16:01:28 **** Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/RadarSubsystem.d,-MT,build/x86_64-debug/src/RadarSubsystem.o -o build/x86_64-debug/src/RadarSubsystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/RadarSubsystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/RadarSubsystem   build/x86_64-debug/src/RadarSubsystem.o build/x86_64-debug/../DataTypes/aircraft.o  
+16:01:36 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:01:53 **** Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+16:03:42 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:03:51 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:06:36 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+16:07:05 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:12:48 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+16:12:53 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:12:59 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:16:12 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:16:25 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:16:31 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+16:17:17 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+16:17:58 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+q++ -Vgcc_ntox86_64_cxx -c -Wp,-MMD,build/x86_64-debug/src/ComputerSystem.d,-MT,build/x86_64-debug/src/ComputerSystem.o -o build/x86_64-debug/src/ComputerSystem.o  -Wall -fmessage-length=0 -g -O0 -fno-builtin  src/ComputerSystem.cpp
+q++ -Vgcc_ntox86_64_cxx -o build/x86_64-debug/ComputerSystem   build/x86_64-debug/src/ComputerSystem.o  
+16:21:50 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.
+16:22:02 **** Incremental Build of configuration x86_64-debug for project ComputerSystem ****
+make -j8 all 
+make: Nothing to be done for 'all'.

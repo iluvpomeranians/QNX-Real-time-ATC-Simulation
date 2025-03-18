@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include "../../DataTypes/aircraft_data.h"
 
-// Shared Mem Ptr to aircrafts
 AircraftData* aircrafts_shared_memory;
 pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -29,19 +28,21 @@ void* violationCheck(void* arg) {
         std::cout << "\n\nChecking for Safety Violations..." << std::endl;
         std::cout << "[DEBUG] Shared Memory Base Address: " << aircrafts_shared_memory << std::endl;
 
-        for (int i = 0; i < MAX_AIRCRAFT; i++) {
+        for (int i = 100; i < 220; i++) {
             AircraftData* aircraft1 = &aircrafts_shared_memory[i];
 
+            // 🚨 Fix: Ensure the memory contains a valid aircraft
+            if (aircraft1 == nullptr || aircraft1->id == 0) continue;
+
             std::cout << "Found Aircraft ID: " << aircraft1->id
-                                  << " at Memory Address: " << aircraft1 << std::endl;
+                      << " at Memory Address: " << aircraft1 << std::endl;
 
-            if (aircraft1->id == 0) continue;
-
-            // Compare against all other aircraft
-            for (int j = i + 1; j < MAX_AIRCRAFT; j++) {
+            // Now correctly compare with other aircraft
+            for (int j = i + 1; j < 220; j++) {
                 AircraftData* aircraft2 = &aircrafts_shared_memory[j];
 
-                if (aircraft2->id == 0) continue; // Skip empty slots
+                // 🚨 Fix: Ensure the memory contains a valid aircraft before accessing
+                if (aircraft2 == nullptr || aircraft2->id == 0) continue;
 
                 double dx = std::fabs(aircraft1->x - aircraft2->x);
                 double dy = std::fabs(aircraft1->y - aircraft2->y);
@@ -57,6 +58,7 @@ void* violationCheck(void* arg) {
                 }
             }
         }
+
 
         pthread_mutex_unlock(&shm_mutex);
     }
@@ -83,11 +85,13 @@ int main() {
         return 1;
     }
 
+    std::cout << "[ComputerSystem] Shared Memory Base Address: " << aircrafts_shared_memory << " with params: " << SHM_NAME <<", " << shm_fd << std::endl;
+
     // Create a monitor thread
     pthread_t monitorThread;
     pthread_create(&monitorThread, NULL, violationCheck, NULL);
-    pthread_join(monitorThread, NULL);
 
+    while (true) sleep(10);
     // Unmap the shared memory (but not unlink it)
     munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
     close(shm_fd);
