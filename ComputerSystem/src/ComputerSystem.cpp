@@ -28,29 +28,30 @@ void* violationCheck(void* arg) {
         std::cout << "\n\nChecking for Safety Violations..." << std::endl;
         std::cout << "[DEBUG] Shared Memory Base Address: " << aircrafts_shared_memory << std::endl;
 
-        for (int i = 100; i < 220; i++) {
+//        uint8_t* base_address = reinterpret_cast<uint8_t*>(aircrafts_shared_memory);
+//        uint8_t* end_address = base_address + (sizeof(AircraftData) * MAX_AIRCRAFT);
+//
+//        std::cout << "Shared Memory Range: "
+//                  << reinterpret_cast<void*>(base_address) << " to "
+//                  << reinterpret_cast<void*>(end_address) << std::endl;
+
+        for (int i = 100; i < 112; i++) {
             AircraftData* aircraft1 = &aircrafts_shared_memory[i];
 
-            // 🚨 Fix: Ensure the memory contains a valid aircraft
             if (aircraft1 == nullptr || aircraft1->id == 0) continue;
 
-            std::cout << "Found Aircraft ID: " << aircraft1->id
-                      << " at Memory Address: " << aircraft1 << std::endl;
-
-            // Now correctly compare with other aircraft
-            for (int j = i + 1; j < 220; j++) {
+            for (int j = i + 1; j < 112; j++) {
                 AircraftData* aircraft2 = &aircrafts_shared_memory[j];
 
-                // 🚨 Fix: Ensure the memory contains a valid aircraft before accessing
                 if (aircraft2 == nullptr || aircraft2->id == 0) continue;
 
                 double dx = std::fabs(aircraft1->x - aircraft2->x);
                 double dy = std::fabs(aircraft1->y - aircraft2->y);
                 double dz = std::fabs(aircraft1->z - aircraft2->z);
 
-                std::cout << "Comparing: " << aircraft1->id << " with " << aircraft2->id << std::endl;
+                std::cout << "Comparing: " << aircraft1->id << " (" << aircraft1->x << "," << aircraft1->y << "," << aircraft1->z << ")"
+                		<< " with " << aircraft2->id << " (" << aircraft2->x << "," <<aircraft2->y << "," <<aircraft2->z << ")" << std::endl;
 
-                // Euclidean horizontal distance
                 double horizontalXYDiff = std::sqrt(dx * dx + dy * dy);
 
                 if (horizontalXYDiff < 3000 || dz < 1000) {
