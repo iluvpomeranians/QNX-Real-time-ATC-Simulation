@@ -2,14 +2,43 @@
 RadarSubsystem/radar_system
 ComputerSystem/computer_system
 
-# Ignore object files
+# Eclipse (Momentics) project files
+.project
+.cproject
+.settings/
+.metadata/
+
+# Ignore any build artifacts
 *.o
-*.a
+*.obj
 *.so
+*.a
+*.out
+*.elf
+*.d
+*.dep
+*.lst
+*.map
+*.srec
+*.bin
+*.hex
 
 # Ignore build directories (if using Make or CMake)
 build/
 bin/
+
+# QNX-specific build and debug output
+workspace.build/
+workspace.qnx/
+debug/
+release/
+*.sym
+*.pid
+*.dmp
+
+# IDE Indexing and cache
+.qnx
+*.autosave
 
 # Ignore VM-specific files and folders (adjust if needed)
 *vm*/
