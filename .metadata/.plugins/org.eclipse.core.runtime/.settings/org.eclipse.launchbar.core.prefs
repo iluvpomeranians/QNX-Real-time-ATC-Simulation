@@ -6,6 +6,7 @@ LaunchTargetManager/com.qnx.tools.ide.target.qconn.qnxVMTarget,vm2/org.eclipse.c
 LaunchTargetManager/com.qnx.tools.ide.target.qconn.qnxVMTarget,vm2/org.eclipse.cdt.dsf.gdb.REMOTE_TCP=true
 LaunchTargetManager/com.qnx.tools.ide.target.qconn.qnxVMTarget,vm2/os=qnx
 LaunchTargetManager/configs/ComputerSystem=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm2
+LaunchTargetManager/configs/DataTypes=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm2
 LaunchTargetManager/configs/RadarSubsystem=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm2
 LaunchTargetManager/configs/bin.RadarSubsystem=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm1
 LaunchTargetManager/configs/remote\ core\ ComputerSystem=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm1
@@ -18,5 +19,6 @@ com.qnx.tools.ide.qde.debug.core.descriptorType.default\:remote\ core\ ComputerS
 com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/ComputerSystem/activeLaunchMode=run
 com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/ComputerSystem/activeLaunchTarget=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm2
 com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/RadarSubsystem/activeLaunchMode=run
-configDescList=com.qnx.tools.ide.qde.debug.core.descriptorType.default\:bin.RadarSubsystem,com.qnx.tools.ide.qde.debug.core.descriptorType.default\:remote core ComputerSystem,com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/RadarSubsystem,com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/ComputerSystem
+com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/RadarSubsystem/activeLaunchTarget=com.qnx.tools.ide.target.qconn.qnxVMTarget\:vm2
+configDescList=com.qnx.tools.ide.qde.debug.core.descriptorType.default\:bin.RadarSubsystem,com.qnx.tools.ide.qde.debug.core.descriptorType.default\:remote core ComputerSystem,com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/DataTypes,com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/RadarSubsystem,com.qnx.tools.ide.qde.debug.core.descriptorType.project\:P/ComputerSystem
 eclipse.preferences.version=1
