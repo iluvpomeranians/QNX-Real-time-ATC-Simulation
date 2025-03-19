@@ -1,6 +1,0 @@
-14:43:13 **** Incremental Build of configuration x86_64-debug for project RadarSubsystem ****
-make -j8 all 
-make: Nothing to be done for 'all'.
-
-14:43:13 Build Finished. 0 errors, 0 warnings. (took 134ms)
-
