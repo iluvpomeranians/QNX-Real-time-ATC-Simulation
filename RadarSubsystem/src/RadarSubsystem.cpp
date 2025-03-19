@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <iostream>
 #include <pthread.h>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
 
@@ -19,33 +22,75 @@ struct SharedMemoryLimits {
 
 SharedMemoryLimits shm_limits_aircraft_data;
 
-void fake_aircraft_data() {
-    std::cout << "Initializing fake aircraft data...\n";
+//void fake_aircraft_data() {
+//    std::cout << "Initializing fake aircraft data...\n";
+//
+//    AircraftData fakeData[MAX_AIRCRAFT] = {
+//        {101, 10000, 20000, 15000, 250, 300, 0, true, true},
+//        {102, 12000, 22000, 17000, -200, -250, 0, true, true},
+//        {103, 9000, 18000, 13000, 300, 200, 50, true, true},
+//        {104, 15000, 25000, 16000, 100, 150, -30, true, true},
+//        {105, 8000, 19000, 14000, 275, -225, 20, true, true},
+//        {106, 11000, 23000, 15500, 125, -175, 35, true, true},
+//        {107, 9500, 21000, 14500, 400, 350, -40, true, true},
+//        {108, 13000, 24000, 16500, 50, -100, 15, true, true},
+//        {109, 14000, 26000, 17500, -350, -275, 10, true, true},
+//        {110, 10500, 22000, 15800, 200, 300, -50, true, true}
+//    };
+//
+//    // Lock shared memory before writing
+//    pthread_mutex_lock(&shm_mutex);
+//
+//    // Write the aircraft data
+//    for (int i = 0; i < 10; i++) {
+//        aircrafts_shared_memory[i] = fakeData[i];
+//    }
+//
+//    // Unlock shared memory after writing
+//    pthread_mutex_unlock(&shm_mutex);
+//}
 
-    AircraftData fakeData[MAX_AIRCRAFT] = {
-        {101, 10000, 20000, 15000, 250, 300, 0, true, true},
-        {102, 12000, 22000, 17000, -200, -250, 0, true, true},
-        {103, 9000, 18000, 13000, 300, 200, 50, true, true},
-        {104, 15000, 25000, 16000, 100, 150, -30, true, true},
-        {105, 8000, 19000, 14000, 275, -225, 20, true, true},
-        {106, 11000, 23000, 15500, 125, -175, 35, true, true},
-        {107, 9500, 21000, 14500, 400, 350, -40, true, true},
-        {108, 13000, 24000, 16500, 50, -100, 15, true, true},
-        {109, 14000, 26000, 17500, -350, -275, 10, true, true},
-        {110, 10500, 22000, 15800, 200, 300, -50, true, true}
-    };
+// Function to read aircraft data from file and load into shared memory
+void load_aircraft_data_from_file(const std::string& file_path) {
+    std::cout << "Reading aircraft data from file: " << file_path << std::endl;
+
+    // Open the file for reading
+    std::ifstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Error: Unable to open file: " << file_path << std::endl;
+        return;
+    }
 
     // Lock shared memory before writing
     pthread_mutex_lock(&shm_mutex);
 
-    // Write the aircraft data
-    for (int i = 0; i < 10; i++) {
-        aircrafts_shared_memory[i] = fakeData[i];
+    std::string line;
+    int index = 0;
+
+    // Read the file line by line
+    while (std::getline(file, line) && index < MAX_AIRCRAFT) {
+        std::istringstream line_stream(line);
+        AircraftData aircraft;
+
+        // Assuming the file contains data in the format: id, x, y, z, speedX, speedY, speedZ, status1, status2
+        double time;
+        line_stream >>  time >> aircraft.id >> aircraft.x >> aircraft.y >> aircraft.z
+                    >> aircraft.speedX >> aircraft.speedY >> aircraft.speedZ;
+
+        // Store the data in shared memory
+        aircrafts_shared_memory[index] = aircraft;
+        index++;
     }
+
+    // Close the file
+    file.close();
 
     // Unlock shared memory after writing
     pthread_mutex_unlock(&shm_mutex);
+
+    std::cout << "Loaded " << index << " aircrafts into shared memory from file.\n";
 }
+
 
 void verify_aircraft_data() {
     std::cout << "Verifying shared memory contents...\n";
@@ -102,7 +147,9 @@ int main() {
     std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << aircrafts_shared_memory
               << std::endl;
 
-    fake_aircraft_data();
+//    fake_aircraft_data();
+    // Load aircraft data from file into shared memory
+    load_aircraft_data_from_file("/tmp/aircraft_data.txt");
     sleep(1);
     verify_aircraft_data();
 

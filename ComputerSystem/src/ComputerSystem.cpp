@@ -3,6 +3,8 @@
 #include <sys/mman.h>
 #include <pthread.h>
 #include <cmath>
+#include <fstream>
+#include <unistd.h>
 #include <stdbool.h>
 #include "../../DataTypes/aircraft_data.h"
 
