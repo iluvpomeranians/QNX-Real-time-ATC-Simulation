@@ -17,14 +17,15 @@ private:
 	static AircraftData* shared_memory;
 
 public:
-	int id;
+	int id, time;
 	double speedX, speedY, speedZ;
 	bool running;
 	name_attach_t* attach;
 	pthread_t position_thread, ipc_thread;
 	std::mutex lock;
 
-	Aircraft(int id,
+	Aircraft(int time,
+			 int id,
 			 double x,
 			 double y,
 			 double z,

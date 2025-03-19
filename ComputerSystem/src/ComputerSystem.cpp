@@ -20,6 +20,8 @@ struct SharedMemoryLimits {
 
 SharedMemoryLimits shm_limits_aircraft_data;
 
+// Program start time (set to 0 at the start)
+time_t start_time = 0;
 // Function to send alert in case of proximity violation
 void sendAlert(int aircraft1, int aircraft2) {
     std::cout << "DEBUG Alert: Aircraft " << aircraft1 <<
@@ -40,6 +42,7 @@ void* violationCheck(void* arg) {
 
     while (1) {
         sleep(5);  // Sleep for 5 seconds
+        start_time++;  // Update start_time by 1 second
         pthread_mutex_lock(&shm_mutex);  // Lock shared memory before accessing
 
         std::cout << "\n\nChecking for Safety Violations..." << std::endl;
@@ -56,25 +59,47 @@ void* violationCheck(void* arg) {
                 continue;  // Skip empty or invalid aircraft data
             }
 
-            // Compare the current aircraft with others
-            for (AircraftData* next_aircraft = current_aircraft + 1; (void*)next_aircraft < upper_limit; next_aircraft++) {
-                if (next_aircraft->id == 0) continue;  // Skip empty or invalid aircraft data
+            // Calculate the elapsed time since entry (in seconds)
+            double elapsedTime = start_time;
 
-                // Calculate the distance between the two aircraft
-                double dx = std::fabs(current_aircraft->x - next_aircraft->x);
-                double dy = std::fabs(current_aircraft->y - next_aircraft->y);
-                double dz = std::fabs(current_aircraft->z - next_aircraft->z);
+            // Only update and compare aircraft that have entered (entry time passed)
+            if (elapsedTime >= current_aircraft->time) {
+				// Update the position based on the elapsed time
+				current_aircraft->x += current_aircraft->speedX * elapsedTime;
+				current_aircraft->y += current_aircraft->speedY * elapsedTime;
+				current_aircraft->z += current_aircraft->speedZ * elapsedTime;
 
-                std::cout << "Comparing: " << current_aircraft->id << " (" << current_aircraft->x << "," << current_aircraft->y << "," << current_aircraft->z << ")"
-                          << " with " << next_aircraft->id << " (" << next_aircraft->x << "," << next_aircraft->y << "," << next_aircraft->z << ")" << std::endl;
+				// Print the aircraft ID and new position
+				std::cout << "Aircraft " << current_aircraft->id
+						  << " updated to position (" << current_aircraft->x << ", "
+						  << current_aircraft->y << ", " << current_aircraft->z << ")"
+						  << " after " << elapsedTime << " seconds." << std::endl;
 
-                // Calculate horizontal distance
-                double horizontalXYDiff = std::sqrt(dx * dx + dy * dy);
+				// Compare the current aircraft with others
+				for (AircraftData* next_aircraft = current_aircraft + 1; (void*)next_aircraft < upper_limit; next_aircraft++) {
+					if (next_aircraft->id == 0) continue;  // Skip empty or invalid aircraft data
 
-                // Check for proximity violation
-                if (horizontalXYDiff < 3000 || dz < 1000) {
-                    sendAlert(current_aircraft->id, next_aircraft->id);
-                }
+					// Calculate the elapsed time for the next aircraft
+					double nextElapsedTime = start_time;
+
+					if(nextElapsedTime > next_aircraft->time){
+						// Calculate the distance between the two aircraft
+						double dx = std::fabs(current_aircraft->x - next_aircraft->x);
+						double dy = std::fabs(current_aircraft->y - next_aircraft->y);
+						double dz = std::fabs(current_aircraft->z - next_aircraft->z);
+
+						std::cout << "Comparing: " << current_aircraft->id << " (" << current_aircraft->x << "," << current_aircraft->y << "," << current_aircraft->z << ")"
+								  << " with " << next_aircraft->id << " (" << next_aircraft->x << "," << next_aircraft->y << "," << next_aircraft->z << ")" << std::endl;
+
+						// Calculate horizontal distance
+						double horizontalXYDiff = std::sqrt(dx * dx + dy * dy);
+
+						// Check for proximity violation
+						if (horizontalXYDiff < 3000 || dz < 1000) {
+							sendAlert(current_aircraft->id, next_aircraft->id);
+						}
+					}
+				}
             }
 
             current_aircraft++;  // Move to next aircraft

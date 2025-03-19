@@ -73,8 +73,7 @@ void load_aircraft_data_from_file(const std::string& file_path) {
         AircraftData aircraft;
 
         // Assuming the file contains data in the format: id, x, y, z, speedX, speedY, speedZ, status1, status2
-        double time;
-        line_stream >>  time >> aircraft.id >> aircraft.x >> aircraft.y >> aircraft.z
+        line_stream >>  aircraft.time >> aircraft.id >> aircraft.x >> aircraft.y >> aircraft.z
                     >> aircraft.speedX >> aircraft.speedY >> aircraft.speedZ;
 
         // Store the data in shared memory
@@ -105,6 +104,7 @@ void verify_aircraft_data() {
         if (aircraft->id == 0) continue;
 
         std::cout << "Aircraft ID: " << aircraft->id
+        		  << " Entry Time: " << aircraft->time
                   << " Position: (" << aircraft->x << ", " << aircraft->y << ", " << aircraft->z << ")"
                   << " Speed: (" << aircraft->speedX << ", " << aircraft->speedY << ", " << aircraft->speedZ << ")"
                   << " Stored at: " << &aircrafts_shared_memory[i] << std::endl;

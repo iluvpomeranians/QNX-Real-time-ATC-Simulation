@@ -14,7 +14,7 @@
 #define MAX_AIRCRAFT 100
 
 struct AircraftData {
-    int id;
+    int time, id;
     double x, y, z;
     double speedX, speedY, speedZ;
     bool detected;
