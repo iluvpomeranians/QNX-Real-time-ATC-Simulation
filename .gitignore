@@ -2,9 +2,7 @@
 RadarSubsystem/radar_system
 ComputerSystem/computer_system
 
-# Eclipse (Momentics) project files
-.project
-.cproject
+# Momentics user settings files
 .settings/
 .metadata/
 
@@ -35,6 +33,10 @@ release/
 *.sym
 *.pid
 *.dmp
+*.core
+
+# Ignore log files
+*.log
 
 # IDE Indexing and cache
 .qnx
