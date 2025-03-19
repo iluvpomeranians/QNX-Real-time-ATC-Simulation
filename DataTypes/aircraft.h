@@ -15,6 +15,7 @@ class Aircraft {
 
 private:
 	static AircraftData* shared_memory;
+	static int aircraft_index;
 
 public:
 	int id, time;

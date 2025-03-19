@@ -65,20 +65,18 @@ void load_aircraft_data_from_file(const std::string& file_path) {
     pthread_mutex_lock(&shm_mutex);
 
     std::string line;
-    int index = 0;
 
     // Read the file line by line
-    while (std::getline(file, line) && index < MAX_AIRCRAFT) {
+    while (std::getline(file, line)) {
         std::istringstream line_stream(line);
-        AircraftData aircraft;
+        AircraftData* aircraft;
 
-        // Assuming the file contains data in the format: id, x, y, z, speedX, speedY, speedZ, status1, status2
-        line_stream >>  aircraft.time >> aircraft.id >> aircraft.x >> aircraft.y >> aircraft.z
-                    >> aircraft.speedX >> aircraft.speedY >> aircraft.speedZ;
+        // Assuming the file contains data in the format: id, x, y, z, speedX, speedY, speedZ
+        line_stream >>  aircraft->time >> aircraft->id >> aircraft->x >> aircraft->y >> aircraft->z
+                    >> aircraft->speedX >> aircraft->speedY >> aircraft->speedZ;
 
-        // Store the data in shared memory
-        aircrafts_shared_memory[index] = aircraft;
-        index++;
+        Aircraft* l_aircraft = new Aircraft(aircraft->time,aircraft->id,aircraft->x,aircraft->y,aircraft->z,aircraft->speedX,aircraft->speedY,aircraft->speedZ,aircrafts_shared_memory);
+        l_aircraft->startThreads();
     }
 
     // Close the file
@@ -86,8 +84,6 @@ void load_aircraft_data_from_file(const std::string& file_path) {
 
     // Unlock shared memory after writing
     pthread_mutex_unlock(&shm_mutex);
-
-    std::cout << "Loaded " << index << " aircrafts into shared memory from file.\n";
 }
 
 
@@ -163,6 +159,7 @@ int main() {
 
     std::cout << "\nIterating through aircraft data using shared memory limits:\n";
     for (size_t i = 0; i < size / sizeof(AircraftData); i++) {
+    	// if(aircraft_pointer[i].id == 0) break;
         std::cout << "Aircraft ID: " << aircraft_pointer[i].id << std::endl;
     }
 

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <unistd.h>
+#include <chrono>
 #include <stdbool.h>
 #include "../../DataTypes/aircraft_data.h"
 
@@ -20,8 +21,9 @@ struct SharedMemoryLimits {
 
 SharedMemoryLimits shm_limits_aircraft_data;
 
-// Program start time (set to 0 at the start)
-time_t start_time = 0;
+// Time points for current and previous timestamps
+std::chrono::time_point<std::chrono::system_clock> current_time, previous_time;
+
 // Function to send alert in case of proximity violation
 void sendAlert(int aircraft1, int aircraft2) {
     std::cout << "DEBUG Alert: Aircraft " << aircraft1 <<
@@ -40,9 +42,17 @@ void* violationCheck(void* arg) {
     // Calculate the upper limit for shared memory
     void* upper_limit = (void*)((char*)shm_limits_aircraft_data.lower_limit + shm_limits_aircraft_data.size);
 
+    // Initialize previous_time with the current system time at the start
+    previous_time = std::chrono::system_clock::now();
+    double last_elapsedTime = 0;
     while (1) {
-        sleep(5);  // Sleep for 5 seconds
-        start_time++;  // Update start_time by 1 second
+        // Update current_time
+        current_time = std::chrono::system_clock::now();
+
+        // Calculate elapsed time between current and previous timestamps
+        std::chrono::duration<double> elapsed_seconds = current_time - previous_time;
+        double elapsedTime = elapsed_seconds.count();  // Get the elapsed time in seconds
+
         pthread_mutex_lock(&shm_mutex);  // Lock shared memory before accessing
 
         std::cout << "\n\nChecking for Safety Violations..." << std::endl;
@@ -59,15 +69,15 @@ void* violationCheck(void* arg) {
                 continue;  // Skip empty or invalid aircraft data
             }
 
-            // Calculate the elapsed time since entry (in seconds)
-            double elapsedTime = start_time;
+            // elapsed time to calculate current position based on speed
+            double diff_eplapsedTime = elapsedTime - last_elapsedTime;
 
             // Only update and compare aircraft that have entered (entry time passed)
             if (elapsedTime >= current_aircraft->time) {
-				// Update the position based on the elapsed time
-				current_aircraft->x += current_aircraft->speedX * elapsedTime;
-				current_aircraft->y += current_aircraft->speedY * elapsedTime;
-				current_aircraft->z += current_aircraft->speedZ * elapsedTime;
+				// Update the position of current aircraft based on the elapsed time
+				current_aircraft->x += current_aircraft->speedX * diff_eplapsedTime / 3600;
+				current_aircraft->y += current_aircraft->speedY * diff_eplapsedTime / 3600;
+				current_aircraft->z += current_aircraft->speedZ * diff_eplapsedTime / 3600;
 
 				// Print the aircraft ID and new position
 				std::cout << "Aircraft " << current_aircraft->id
@@ -79,10 +89,12 @@ void* violationCheck(void* arg) {
 				for (AircraftData* next_aircraft = current_aircraft + 1; (void*)next_aircraft < upper_limit; next_aircraft++) {
 					if (next_aircraft->id == 0) continue;  // Skip empty or invalid aircraft data
 
-					// Calculate the elapsed time for the next aircraft
-					double nextElapsedTime = start_time;
+					// Update the position of next_aircraft based on the elapsed time
+					next_aircraft->x += next_aircraft->speedX * diff_eplapsedTime / 3600;
+					next_aircraft->y += next_aircraft->speedY * diff_eplapsedTime / 3600;
+					next_aircraft->z += next_aircraft->speedZ * diff_eplapsedTime / 3600;
 
-					if(nextElapsedTime > next_aircraft->time){
+					if(elapsedTime >= next_aircraft->time){
 						// Calculate the distance between the two aircraft
 						double dx = std::fabs(current_aircraft->x - next_aircraft->x);
 						double dy = std::fabs(current_aircraft->y - next_aircraft->y);
@@ -104,6 +116,8 @@ void* violationCheck(void* arg) {
 
             current_aircraft++;  // Move to next aircraft
         }
+
+        sleep(5);  // Sleep for 5 seconds
 
         pthread_mutex_unlock(&shm_mutex);  // Unlock shared memory after access
     }
