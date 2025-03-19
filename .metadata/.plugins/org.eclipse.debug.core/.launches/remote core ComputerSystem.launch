@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<launchConfiguration type="com.qnx.tools.ide.qde.ui.QDERemoteCoreLaunch">
-    <booleanAttribute key="com.qnx.tools.ide.qde.core.LOAD_FROM_TARGET" value="true"/>
-    <stringAttribute key="com.qnx.tools.ide.qde.core.REMOTE_COREFILE_PATH" value="/data/var/dumper/ComputerSystem.core"/>
-    <stringAttribute key="com.qnx.tools.ide.qde.core.TARGET_ATTR" value="vm2"/>
-    <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="C:\Users\david\Desktop\Coen320\ATC_Project\ComputerSystem\build\x86_64-debug\ComputerSystem"/>
-    <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="ComputerSystem"/>
-</launchConfiguration>
