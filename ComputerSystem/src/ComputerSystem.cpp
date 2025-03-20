@@ -37,19 +37,22 @@ void sendIdToDisplay(int aircraft_id) {
     // TODO: Implement display mechanism (e.g., show ID on screen)
 }
 
+// Function to calculate projected position in the next `time` seconds
+void getProjectedPosition(AircraftData& aircraft, double time) {
+    // Update the aircraft position based on its speed
+    aircraft.x += aircraft.speedX * time / 3600;  // converting speed to distance
+    aircraft.y += aircraft.speedY * time / 3600;
+    aircraft.z += aircraft.speedZ * time / 3600;
+}
+
 // Thread function to check for violations
 void* violationCheck(void* arg) {
     // Calculate the upper limit for shared memory
     void* upper_limit = (void*)((char*)shm_limits_aircraft_data.lower_limit + shm_limits_aircraft_data.size);
-
-    // Initialize previous_time with the current system time at the start
     previous_time = std::chrono::system_clock::now();
     double last_elapsedTime = 0;
     while (1) {
-        // Update current_time
         current_time = std::chrono::system_clock::now();
-
-        // Calculate elapsed time between current and previous timestamps
         std::chrono::duration<double> elapsed_seconds = current_time - previous_time;
         double elapsedTime = elapsed_seconds.count();  // Get the elapsed time in seconds
 
@@ -58,23 +61,17 @@ void* violationCheck(void* arg) {
         std::cout << "\n\nChecking for Safety Violations..." << std::endl;
         std::cout << "[DEBUG] Shared Memory Base Address: " << shm_limits_aircraft_data.lower_limit << std::endl;
 
-        // Pointer to the first aircraft data entry
         AircraftData* current_aircraft = (AircraftData*) shm_limits_aircraft_data.lower_limit;
 
-        // Iterate through shared memory using pointer arithmetic
         while ((void*)current_aircraft < upper_limit) {
-            // Check if the current aircraft pointer is valid
             if (current_aircraft->id == 0) {
-                current_aircraft++;  // Move to next aircraft
-                continue;  // Skip empty or invalid aircraft data
+                current_aircraft++;
+                continue;
             }
 
-            // elapsed time to calculate current position based on speed
             double diff_eplapsedTime = elapsedTime - last_elapsedTime;
 
-            // Only update and compare aircraft that have entered (entry time passed)
             if (elapsedTime >= current_aircraft->time) {
-				// Update the position of current aircraft based on the elapsed time
 				current_aircraft->x += current_aircraft->speedX * diff_eplapsedTime / 3600;
 				current_aircraft->y += current_aircraft->speedY * diff_eplapsedTime / 3600;
 				current_aircraft->z += current_aircraft->speedZ * diff_eplapsedTime / 3600;
@@ -85,7 +82,6 @@ void* violationCheck(void* arg) {
 						  << current_aircraft->y << ", " << current_aircraft->z << ")"
 						  << " after " << elapsedTime << " seconds." << std::endl;
 
-				// Compare the current aircraft with others
 				for (AircraftData* next_aircraft = current_aircraft + 1; (void*)next_aircraft < upper_limit; next_aircraft++) {
 					if (next_aircraft->id == 0) continue;  // Skip empty or invalid aircraft data
 
@@ -95,7 +91,6 @@ void* violationCheck(void* arg) {
 					next_aircraft->z += next_aircraft->speedZ * diff_eplapsedTime / 3600;
 
 					if(elapsedTime >= next_aircraft->time){
-						// Calculate the distance between the two aircraft
 						double dx = std::fabs(current_aircraft->x - next_aircraft->x);
 						double dy = std::fabs(current_aircraft->y - next_aircraft->y);
 						double dz = std::fabs(current_aircraft->z - next_aircraft->z);
@@ -103,13 +98,33 @@ void* violationCheck(void* arg) {
 						std::cout << "Comparing: " << current_aircraft->id << " (" << current_aircraft->x << "," << current_aircraft->y << "," << current_aircraft->z << ")"
 								  << " with " << next_aircraft->id << " (" << next_aircraft->x << "," << next_aircraft->y << "," << next_aircraft->z << ")" << std::endl;
 
-						// Calculate horizontal distance
 						double horizontalXYDiff = std::sqrt(dx * dx + dy * dy);
 
 						// Check for proximity violation
 						if (horizontalXYDiff < 3000 || dz < 1000) {
 							sendAlert(current_aircraft->id, next_aircraft->id);
 						}
+
+						// Check if a violation will happen within the next 2 minutes
+                        double time_to_violation = 0;
+                        if (horizontalXYDiff >= 3000 && dz >= 1000) {
+                            // Calculate the projected positions of both aircraft in 2 minutes (120 seconds)
+                            AircraftData projected_current = *current_aircraft;
+                            AircraftData projected_next = *next_aircraft;
+
+                            getProjectedPosition(projected_current, 120);  // In 2 minutes
+                            getProjectedPosition(projected_next, 120);  // In 2 minutes
+
+                            // Calculate the projected distance between the two aircraft
+                            double projected_dx = std::fabs(projected_current.x - projected_next.x);
+                            double projected_dy = std::fabs(projected_current.y - projected_next.y);
+                            double projected_dz = std::fabs(projected_current.z - projected_next.z);
+                            double projected_horizontalXYDiff = std::sqrt(projected_dx * projected_dx + projected_dy * projected_dy);
+
+                            if (projected_horizontalXYDiff < 3000 || projected_dz < 1000) {
+                                sendAlert(current_aircraft->id, next_aircraft->id);  // Upcoming alert
+                            }
+                        }
 					}
 				}
             }
@@ -117,9 +132,8 @@ void* violationCheck(void* arg) {
             current_aircraft++;  // Move to next aircraft
         }
 
-        sleep(5);  // Sleep for 5 seconds
-
         pthread_mutex_unlock(&shm_mutex);  // Unlock shared memory after access
+        sleep(5);  // Sleep for 5 seconds
     }
 }
 
