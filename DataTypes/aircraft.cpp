@@ -1,7 +1,7 @@
 #include "aircraft.h"
 
 AircraftData* Aircraft::shared_memory = nullptr;
-static int aircraft_index = 0;
+int Aircraft::aircraft_index = 0;
 
 Aircraft::Aircraft(int time,
 				   int id,
@@ -11,8 +11,8 @@ Aircraft::Aircraft(int time,
 				   double speedX,
 				   double speedY,
 				   double speedZ,
-				   AircraftData* shared_mem): time(time),
-						   	   	   id(id),
+				   AircraftData* shared_mem):  id(id),
+								   time(time),
 						   	   	   speedX(speedX),
 								   speedY(speedY),
 								   speedZ(speedZ),
@@ -26,7 +26,7 @@ Aircraft::Aircraft(int time,
 
 	std::cout << "[Aircraft] Using Shared Memory Address: " << Aircraft::shared_memory << std::endl;
 
-	Aircraft::shared_memory[aircraft_index] = {time, id, x, y, z, speedX, speedY, speedZ, true, true};
+	Aircraft::shared_memory[aircraft_index] = {id, time, x, y, z, speedX, speedY, speedZ, true, true};
 
 	std::cout << "Aircraft Created: " << id
 	          << " Stored at: " << &Aircraft::shared_memory[id]
