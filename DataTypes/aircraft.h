@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sys/dispatch.h>
 #include <mutex>
+#include <time.h>
 
 class Aircraft {
 
@@ -18,14 +19,16 @@ private:
 	static int aircraft_index;
 
 public:
-	int id, time;
+	time_t entryTime, lastupdatedTime;
+	int id;
 	double speedX, speedY, speedZ;
 	bool running;
 	name_attach_t* attach;
 	pthread_t position_thread, ipc_thread;
 	std::mutex lock;
+	int shm_index;
 
-	Aircraft(int time,
+	Aircraft(time_t entryTime,
 			 int id,
 			 double x,
 			 double y,

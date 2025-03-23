@@ -8,13 +8,14 @@
 #ifndef AIRCRAFT_DATA_H_
 #define AIRCRAFT_DATA_H_
 
-#include <ctime>
+#include <time.h>
 
 #define SHM_NAME "/air_traffic_shm"
 #define MAX_AIRCRAFT 100
 
 struct AircraftData {
-    int time, id;
+	time_t entryTime, lastupdatedTime;
+    int id;
     double x, y, z;
     double speedX, speedY, speedZ;
     bool detected;

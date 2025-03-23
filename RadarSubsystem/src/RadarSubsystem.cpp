@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <regex>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
 
@@ -14,7 +15,6 @@ int shm_fd_aircraft_data;
 
 pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;  // Mutex to synchronize access to shared memory
 
-// Structure to store the shared memory limits
 struct SharedMemoryLimits {
     void* lower_limit;  // Pointer to the start of shared memory
     size_t size;        // Size of the shared memory
@@ -22,40 +22,73 @@ struct SharedMemoryLimits {
 
 SharedMemoryLimits shm_limits_aircraft_data;
 
-// Function to read aircraft data from file and load into shared memory
+time_t parseToTimeT(const std::string& input) {
+    std::tm tm = {};
+    time_t now = time(NULL);
+
+    // epoch timestamp (digits only)
+    if (std::regex_match(input, std::regex("^\\d{9,}$"))) {
+        return static_cast<time_t>(std::stoll(input));
+    }
+
+    // "YYYY-MM-DD HH:MM:SS"
+    if (strptime(input.c_str(), "%Y-%m-%d %H:%M:%S", &tm)) {
+        return mktime(&tm);
+    }
+
+    // "YYYY-MM-DD"
+    if (strptime(input.c_str(), "%Y-%m-%d", &tm)) {
+        return mktime(&tm);
+    }
+
+    // "HH:MM:SS"
+    if (strptime(input.c_str(), "%H:%M:%S", &tm)) {
+        std::tm* now_tm = localtime(&now);
+        tm.tm_year = now_tm->tm_year;
+        tm.tm_mon = now_tm->tm_mon;
+        tm.tm_mday = now_tm->tm_mday;
+        return mktime(&tm);
+    }
+
+    // Relative seconds offset (e.g. "2", "15")
+	if (std::regex_match(input, std::regex("^\\d+$"))) {
+		int offset = std::stoi(input);
+		return now + offset;
+	}
+
+    std::cerr << "Invalid time format: " << input << std::endl;
+    return -1;
+}
+
 void load_aircraft_data_from_file(const std::string& file_path) {
     std::cout << "Reading aircraft data from file: " << file_path << std::endl;
 
-    // Open the file for reading
     std::ifstream file(file_path);
     if (!file.is_open()) {
         std::cerr << "Error: Unable to open file: " << file_path << std::endl;
         return;
     }
 
-    // Lock shared memory before writing
     pthread_mutex_lock(&shm_mutex);
 
     std::string line;
 
-    // Read the file line by line
     while (std::getline(file, line)) {
         std::istringstream line_stream(line);
         AircraftData aircraft_data;
         AircraftData* aircraft = &aircraft_data;
+        std::string temp_time_str;
 
-        // Assuming the file contains data in the format: id, x, y, z, speedX, speedY, speedZ
-        line_stream >> aircraft->id >>  aircraft->time >> aircraft->x >> aircraft->y >> aircraft->z
+        line_stream >> temp_time_str >> aircraft->id >> aircraft->x >> aircraft->y >> aircraft->z
                     >> aircraft->speedX >> aircraft->speedY >> aircraft->speedZ;
 
-        Aircraft* l_aircraft = new Aircraft(aircraft->time,aircraft->id,aircraft->x,aircraft->y,aircraft->z,aircraft->speedX,aircraft->speedY,aircraft->speedZ,aircrafts_shared_memory);
+        aircraft->entryTime = parseToTimeT(temp_time_str);
+        Aircraft* l_aircraft = new Aircraft(aircraft->entryTime,aircraft->id,aircraft->x,aircraft->y,aircraft->z,aircraft->speedX,aircraft->speedY,aircraft->speedZ,aircrafts_shared_memory);
         l_aircraft->startThreads();
     }
 
-    // Close the file
     file.close();
 
-    // Unlock shared memory after writing
     pthread_mutex_unlock(&shm_mutex);
 }
 
@@ -63,30 +96,26 @@ void load_aircraft_data_from_file(const std::string& file_path) {
 void verify_aircraft_data() {
     std::cout << "Verifying shared memory contents...\n";
 
-    // Lock shared memory before reading
     pthread_mutex_lock(&shm_mutex);
 
-    // Verify Aircraft Data
     for (int i = 0; i < MAX_AIRCRAFT; i++) {
         AircraftData* aircraft = &aircrafts_shared_memory[i];
 
         if (aircraft->id == 0) continue;
 
         std::cout << "Aircraft ID: " << aircraft->id
-        		  << " Entry Time: " << aircraft->time
+        		  << " Entry Time: " << aircraft->entryTime
                   << " Position: (" << aircraft->x << ", " << aircraft->y << ", " << aircraft->z << ")"
                   << " Speed: (" << aircraft->speedX << ", " << aircraft->speedY << ", " << aircraft->speedZ << ")"
                   << " Stored at: " << &aircrafts_shared_memory[i] << std::endl;
     }
 
-    // Unlock shared memory after reading
     pthread_mutex_unlock(&shm_mutex);
 }
 
 int main() {
     std::cout << "Initializing Shared Memory...\n";
 
-    // Create shared memory for aircraft data
     shm_fd_aircraft_data = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
     if (shm_fd_aircraft_data == -1) {
         perror("shm_open failed for aircraft data");
@@ -116,7 +145,6 @@ int main() {
     std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << aircrafts_shared_memory
               << std::endl;
 
-    // Load aircraft data from file into shared memory
     load_aircraft_data_from_file("/tmp/aircraft_data.txt");
     sleep(1);
     verify_aircraft_data();
@@ -131,7 +159,7 @@ int main() {
 
     std::cout << "\nIterating through aircraft data using shared memory limits:\n";
     for (size_t i = 0; i < size / sizeof(AircraftData); i++) {
-    	if(aircraft_pointer[i].id == 0) break;
+    	if (aircraft_pointer[i].id == 0) continue;
         std::cout << "Aircraft ID: " << aircraft_pointer[i].id << std::endl;
     }
 

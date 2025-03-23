@@ -3,7 +3,7 @@
 AircraftData* Aircraft::shared_memory = nullptr;
 int Aircraft::aircraft_index = 0;
 
-Aircraft::Aircraft(int time,
+Aircraft::Aircraft(time_t entryTime,
 				   int id,
 		           double x,
 				   double y,
@@ -11,26 +11,32 @@ Aircraft::Aircraft(int time,
 				   double speedX,
 				   double speedY,
 				   double speedZ,
-				   AircraftData* shared_mem):  id(id),
-								   time(time),
+				   AircraftData* shared_mem):
+								   entryTime(entryTime),
+								   id(id),
 						   	   	   speedX(speedX),
 								   speedY(speedY),
 								   speedZ(speedZ),
 								   running(true),
 								   attach(nullptr),
 								   position_thread(0),
-								   ipc_thread(0)
+								   ipc_thread(0),
+								   shm_index(aircraft_index)
 								   {
+
+	// Shared memory shouldn't be inserted until entry time has occured
 
 	if (Aircraft::shared_memory == nullptr){Aircraft::shared_memory = shared_mem;}
 
 	std::cout << "[Aircraft] Using Shared Memory Address: " << Aircraft::shared_memory << std::endl;
 
-	Aircraft::shared_memory[aircraft_index] = {id, time, x, y, z, speedX, speedY, speedZ, true, true};
+	lastupdatedTime = time(NULL);
+
+	Aircraft::shared_memory[shm_index] = {entryTime, lastupdatedTime, id, x, y, z, speedX, speedY, speedZ, true, true};
 
 	std::cout << "Aircraft Created: " << id
-	          << " Stored at: " << &Aircraft::shared_memory[id]
-	          << " ID in Memory: " << Aircraft::shared_memory[id].id
+	          << " Stored at: " << &Aircraft::shared_memory[shm_index]
+	          << " ID in Memory: " << Aircraft::shared_memory[shm_index].id
 	          << std::endl;
 
 	aircraft_index++;
@@ -38,17 +44,24 @@ Aircraft::Aircraft(int time,
 }
 
 
-void* Aircraft::updatePositionThread(void* arg){
-	Aircraft* aircraft = static_cast<Aircraft*>(arg);
-	while(aircraft->running){
-		std::lock_guard<std::mutex> guard(aircraft->lock);
-		Aircraft::shared_memory[aircraft->id].x += aircraft->speedX;
-		Aircraft::shared_memory[aircraft->id].y += aircraft->speedY;
-		Aircraft::shared_memory[aircraft->id].z += aircraft->speedZ;
+void* Aircraft::updatePositionThread(void* arg) {
+    Aircraft* aircraft = static_cast<Aircraft*>(arg);
 
-		sleep(1);
-	}
-	return nullptr;
+    struct timespec req;
+    req.tv_sec = 1;         // 1 second
+    req.tv_nsec = 0;        // 0 nanoseconds
+
+    while (aircraft->running) {
+        std::lock_guard<std::mutex> guard(aircraft->lock);
+
+        Aircraft::shared_memory[aircraft->shm_index].x += aircraft->speedX;
+        Aircraft::shared_memory[aircraft->shm_index].y += aircraft->speedY;
+        Aircraft::shared_memory[aircraft->shm_index].z += aircraft->speedZ;
+
+        nanosleep(&req, NULL);
+    }
+
+    return nullptr;
 }
 
 void* Aircraft::messageHandlerThread(void* arg){
@@ -104,7 +117,6 @@ Aircraft::~Aircraft(){
 
 	stopThreads();
 
-	//Close IPCizzle comms
 	if (attach){
 		name_detach(attach, 0);
 	}
