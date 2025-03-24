@@ -1,3 +1,12 @@
+#include <pthread.h>
+#include <sys/neutrino.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <iostream>
+#include <mutex>
+#include <time.h>
 #include "aircraft.h"
 
 AircraftData* Aircraft::shared_memory = nullptr;

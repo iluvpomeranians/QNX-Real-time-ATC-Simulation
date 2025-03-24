@@ -1,16 +1,8 @@
 #pragma once
 
-#include "aircraft_data.h"
-#include <pthread.h>
-#include <sys/neutrino.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <iostream>
 #include <sys/dispatch.h>
-#include <mutex>
-#include <time.h>
+#include "aircraft_data.h"
+
 
 class Aircraft {
 
