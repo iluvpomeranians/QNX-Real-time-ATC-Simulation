@@ -6,18 +6,20 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <regex>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
 
 AircraftData* aircrafts_shared_memory = nullptr;
+std::vector<Aircraft*> activeAircrafts;
 int shm_fd_aircraft_data;
-
-pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;  // Mutex to synchronize access to shared memory
+pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_t airspace_thread;
 
 struct SharedMemoryLimits {
-    void* lower_limit;  // Pointer to the start of shared memory
-    size_t size;        // Size of the shared memory
+    void* lower_limit;
+    size_t size;
 };
 
 SharedMemoryLimits shm_limits_aircraft_data;
@@ -75,16 +77,26 @@ void load_aircraft_data_from_file(const std::string& file_path) {
 
     while (std::getline(file, line)) {
         std::istringstream line_stream(line);
-        AircraftData aircraft_data;
-        AircraftData* aircraft = &aircraft_data;
+        AircraftData* aircraft = new AircraftData();
         std::string temp_time_str;
 
         line_stream >> temp_time_str >> aircraft->id >> aircraft->x >> aircraft->y >> aircraft->z
                     >> aircraft->speedX >> aircraft->speedY >> aircraft->speedZ;
 
         aircraft->entryTime = parseToTimeT(temp_time_str);
-        Aircraft* l_aircraft = new Aircraft(aircraft->entryTime,aircraft->id,aircraft->x,aircraft->y,aircraft->z,aircraft->speedX,aircraft->speedY,aircraft->speedZ,aircrafts_shared_memory);
+        Aircraft* l_aircraft = new Aircraft(aircraft->entryTime,
+        									aircraft->id,
+											aircraft->x,
+											aircraft->y,
+											aircraft->z,
+											aircraft->speedX,
+											aircraft->speedY,
+											aircraft->speedZ,
+											aircrafts_shared_memory);
         l_aircraft->startThreads();
+
+        activeAircrafts.push_back(l_aircraft);
+        delete aircraft;
     }
 
     file.close();
@@ -108,9 +120,39 @@ void verify_aircraft_data() {
                   << " Position: (" << aircraft->x << ", " << aircraft->y << ", " << aircraft->z << ")"
                   << " Speed: (" << aircraft->speedX << ", " << aircraft->speedY << ", " << aircraft->speedZ << ")"
                   << " Stored at: " << &aircrafts_shared_memory[i] << std::endl;
+
     }
 
     pthread_mutex_unlock(&shm_mutex);
+}
+
+void* updateAirspaceDetectionThread(void* arg){
+	struct timespec req;
+		    req.tv_sec = 1;         // 1 second
+		    req.tv_nsec = 0;        // 0 nanoseconds
+
+	while(1){
+		for(Aircraft* a : activeAircrafts){
+				AircraftData* aircraft = &aircrafts_shared_memory[a->shm_index];
+				if(aircraft->x > 100000 || aircraft->y > 100000 || aircraft->x < 0 || aircraft->y < 0
+						|| aircraft->z > 25000 || aircraft->z < 15000){
+					aircraft->detected = false;
+				}
+				else{aircraft->detected = true;}
+
+			}
+		 nanosleep(&req, NULL);
+	}
+	return nullptr;
+}
+
+void cleanUpOnExit(){
+	for(Aircraft* a: activeAircrafts){
+		delete a;
+	}
+
+	activeAircrafts.clear();
+	pthread_join(airspace_thread, nullptr);
 }
 
 int main() {
@@ -149,6 +191,9 @@ int main() {
     sleep(1);
     verify_aircraft_data();
 
+	pthread_create(&airspace_thread, nullptr, updateAirspaceDetectionThread, NULL);
+
+
     std::cout << "Radar System initialized. Shared memory ready.\n";
 
     // Use the shared memory limits to iterate over shared memory
@@ -167,6 +212,8 @@ int main() {
 
     munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
     close(shm_fd_aircraft_data);
+
+    cleanUpOnExit();
 
     return 0;
 }
