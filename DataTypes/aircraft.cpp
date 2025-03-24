@@ -66,6 +66,7 @@ void* Aircraft::updatePositionThread(void* arg) {
         Aircraft::shared_memory[aircraft->shm_index].x += aircraft->speedX;
         Aircraft::shared_memory[aircraft->shm_index].y += aircraft->speedY;
         Aircraft::shared_memory[aircraft->shm_index].z += aircraft->speedZ;
+        Aircraft::shared_memory[aircraft->shm_index].lastupdatedTime = time(nullptr);
 
         nanosleep(&req, NULL);
     }
