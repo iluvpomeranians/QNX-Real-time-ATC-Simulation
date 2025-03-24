@@ -3,13 +3,17 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <ctime>
+#include <vector>
+#include <cstring>
+#include <iomanip>
+#include <string>
 #include <cstring>
 #include "../../DataTypes/aircraft_data.h"
 
 #define AIRSPACE_WIDTH 100000
 #define AIRSPACE_HEIGHT 100000
 #define DISPLAY_WIDTH 50
-#define DISPLAY_HEIGHT 25
+#define DISPLAY_HEIGHT 14
 
 AircraftData* aircrafts = nullptr;
 
@@ -53,9 +57,12 @@ char getDirectionArrow(float vx, float vy) {
 void drawAirspace() {
     char screen[DISPLAY_HEIGHT][DISPLAY_WIDTH];
     memset(screen, '.', sizeof(screen));
+    std::vector<AircraftData> activeAircrafts;
 
     for (int i = 0; i < MAX_AIRCRAFT; ++i) {
         if (!aircrafts[i].detected) continue;
+
+        activeAircrafts.push_back(aircrafts[i]);
 
         int x = static_cast<int>((aircrafts[i].x / AIRSPACE_WIDTH) * DISPLAY_WIDTH);
         int y = static_cast<int>((aircrafts[i].y / AIRSPACE_HEIGHT) * DISPLAY_HEIGHT);
@@ -77,33 +84,62 @@ void drawAirspace() {
         }
     }
 
-    for (int col = 0; col < DISPLAY_WIDTH; ++col){
-    	std::cout << "=";
-    }
+    // Draw Top Border
+       for (int col = 0; col < DISPLAY_WIDTH * 2; ++col) std::cout << "=";
+       std::cout << "===\n";
 
-    std::cout << "==\n";
+       std::cout << "|" << std::setw(DISPLAY_WIDTH) << std::left << " AIRSPACE ";
+       std::cout << "||   "
+          << std::setw(4) << std::left << "ID"
+          << std::setw(8) << "X"
+          << std::setw(8) << "Y"
+          << std::setw(8) << "Z"
+          << std::setw(6) << "VX"
+          << std::setw(6) << "VY"
+          << std::setw(4) << "VZ"
+          << " |\n";
 
-    for (int row = 0; row < DISPLAY_HEIGHT; ++row) {
-    	std::cout << "|" ;
-        for (int col = 0; col < DISPLAY_WIDTH; ++col) {
-            std::cout << screen[row][col];
-            if (col == DISPLAY_WIDTH - 1){
-            	std::cout << "|";
+       // Draw Grid + Dashboard
+       for (int row = 0; row < DISPLAY_HEIGHT; ++row) {
+           std::cout << "|";
+           for (int col = 0; col < DISPLAY_WIDTH; ++col) {
+               std::cout << screen[row][col];
+           }
+
+           std::cout << "|";
+
+           if (row < static_cast<int>(activeAircrafts.size())) {
+            const AircraftData& a = activeAircrafts[row];
+            std::cout << "|   "
+                      << std::setw(4) << std::left << a.id
+                      << std::setw(8) << static_cast<int>(a.x)
+                      << std::setw(8) << static_cast<int>(a.y)
+                      << std::setw(8) << static_cast<int>(a.z)
+                      << std::setw(6) << static_cast<int>(a.speedX)
+                      << std::setw(6) << static_cast<int>(a.speedY)
+                      << std::setw(4) << static_cast<int>(a.speedZ)
+                      << " |\n";
+            } else {
+                std::cout << "|   "
+                        << std::setw(4) << " "
+                        << std::setw(8) << " "
+                        << std::setw(8) << " "
+                        << std::setw(8) << " "
+                        << std::setw(6) << " "
+                        << std::setw(6) << " "
+                        << std::setw(4) << " "
+                        << " |\n";
             }
-        }
-        std::cout << '\n';
-    }
+        
+           std::cout << "|\n";
+       }
 
-    for (int col = 0; col < DISPLAY_WIDTH; ++col){
-        	std::cout << "=";
-        }
-
-        std::cout << "==\n";
-}
+       for (int col = 0; col < DISPLAY_WIDTH * 2; ++col) std::cout << "=";
+       std::cout << "===\n";
+  }
 
 int main() {
     connectToSharedMemory();
-    drawAirspace();
     std::time_t lastUpdate = 0;
     while (true) {
         std::time_t now = std::time(nullptr);
