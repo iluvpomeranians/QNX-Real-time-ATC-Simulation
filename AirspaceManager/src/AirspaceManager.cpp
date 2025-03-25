@@ -3,9 +3,7 @@
 #include <sstream>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <pthread.h>
-//#include <sys/dispatch.h>
 #include <utility>
 #include <vector>
 #include <regex>
@@ -18,9 +16,9 @@ using namespace std;
 #define AIRSPACE_SHM_NAME "/airspace_shm"
 
 int shm_fd;
-Airspace *airspace;
+Airspace *airspace = nullptr;
 
-vector<std::pair<time_t, AircraftData>> aircraft_queue;
+vector<pair<time_t, AircraftData>> aircraft_queue;
 
 Airspace* init_shared_memory() {
 	cout << "Initializing Shared Memory..." << endl;
@@ -53,16 +51,18 @@ Airspace* init_shared_memory() {
 
 	// Initialize the shared memory to 0x0
 	memset(airspace, 0, sizeof(Airspace));
+
+	cout << "Airspace shared memory initialized successfully...\n";
 	return airspace;
 }
 
-time_t parseToTimeT(const std::string& input) {
+time_t parseToTimeT(const string& input) {
     std::tm tm = {};
     time_t now = time(NULL);
 
     // epoch timestamp (digits only)
-    if (std::regex_match(input, std::regex("^\\d{9,}$"))) {
-        return static_cast<time_t>(std::stoll(input));
+    if (regex_match(input, regex("^\\d{9,}$"))) {
+        return static_cast<time_t>(stoll(input));
     }
 
     // "YYYY-MM-DD HH:MM:SS"
@@ -85,36 +85,39 @@ time_t parseToTimeT(const std::string& input) {
     }
 
     // Relative seconds offset (e.g. "2", "15")
-	if (std::regex_match(input, std::regex("^\\d+$"))) {
-		int offset = std::stoi(input);
+	if (regex_match(input, regex("^\\d+$"))) {
+		int offset = stoi(input);
 		return now + offset;
 	}
 
-    std::cerr << "Invalid time format: " << input << std::endl;
+    cerr << "Invalid time format: " << input << endl;
     return -1;
 }
 
-void load_aircraft_data_from_file(const std::string &file_path) {
-    std::cout << "Reading aircraft data from file: " << file_path << std::endl;
+void load_aircraft_data_from_file(const string &file_path) {
+    cout << "Reading aircraft data from file: " << file_path << endl;
 
-    std::ifstream file(file_path);
+    ifstream file(file_path);
     if (!file.is_open()) {
-        std::cerr << "Error: Unable to open file: " << file_path << std::endl;
+        cerr << "Error: Unable to open file: " << file_path << endl;
         exit(EXIT_FAILURE);
     }
 
-    std::string line;
+    string line;
 
-    while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
+    while (getline(file, line)) {
+        istringstream line_stream(line);
         AircraftData aircraft_data;
-        std::string temp_time_str;
+        string temp_time_str;
 
-        line_stream >> temp_time_str >> aircraft_data.id >> aircraft_data.x >> aircraft_data.y >> aircraft_data.z
-                    >> aircraft_data.speedX >> aircraft_data.speedY >> aircraft_data.speedZ;
+        line_stream >> temp_time_str >> aircraft_data.id >> aircraft_data.x
+		            >> aircraft_data.y >> aircraft_data.z
+					>> aircraft_data.speedX >> aircraft_data.speedY
+					>> aircraft_data.speedZ;
 
         aircraft_data.entryTime = parseToTimeT(temp_time_str);
         aircraft_queue.emplace_back(aircraft_data.entryTime, aircraft_data);
+
         Aircraft* l_aircraft = new Aircraft(aircraft_data.entryTime,
 											aircraft_data.id,
 											aircraft_data.x,
@@ -125,7 +128,6 @@ void load_aircraft_data_from_file(const std::string &file_path) {
 											aircraft_data.speedZ,
 											airspace);
         l_aircraft->startThreads();
-        // l_aircraft->startThreads();
     }
     file.close();
 }
@@ -146,14 +148,42 @@ void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
 	shm_unlink(shm_name);
 }
 
+void verify_aircraft_data() {
+    cout << "Verifying shared memory contents...\n";
+
+    pthread_mutex_lock(&airspace->lock);
+
+    for (int i = 0; i < MAX_AIRCRAFT; i++) {
+        AircraftData* aircraft = &airspace->aircraft_data[i];
+
+        if (aircraft->id == 0) continue;
+
+        cout << "Aircraft ID: " << aircraft->id
+        		  << " Entry Time: " << aircraft->entryTime
+                  << " Position: (" << aircraft->x << ", " << aircraft->y << ", " << aircraft->z << ")"
+                  << " Speed: (" << aircraft->speedX << ", " << aircraft->speedY << ", " << aircraft->speedZ << ")"
+                  << " Stored at: " << &airspace->aircraft_data[i] << endl;
+
+    }
+
+    pthread_mutex_unlock(&airspace->lock);
+}
+
 int main() {
 
 	airspace = init_shared_memory();
 
 	load_aircraft_data_from_file("/tmp/aircraft_data.txt");
+	sleep(1);
+	verify_aircraft_data();
 
 	// Sort the aircraft in queue according to entry time
 
+	cout << "\nIterating through aircraft data using shared memory limits:\n";
+	for (size_t i = 0; i < MAX_AIRCRAFT; i++) {
+		if (airspace->aircraft_data[i].id == 0) continue;
+		cout << "Aircraft ID: " << airspace->aircraft_data[i].id << endl;
+	}
 	cout << "Press Enter to start airspace simulation..." << endl;
 	cin.get();
 

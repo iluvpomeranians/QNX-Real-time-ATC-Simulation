@@ -61,11 +61,13 @@ void* Aircraft::updatePositionThread(void* arg) {
     req.tv_nsec = 0;        // 0 nanoseconds
 
     while (aircraft->running) {
+    	// TODO: Schedule for delete
         std::lock_guard<std::mutex> guard(aircraft->lock);
 
         // Acquire lock on shared memory mutex
         pthread_mutex_lock(&shared_memory->lock);
 
+        // Update aircraft position based on speed
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].x += aircraft->speedX;
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].y += aircraft->speedY;
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].z += aircraft->speedZ;
