@@ -9,7 +9,7 @@
 #include <time.h>
 #include "aircraft.h"
 
-AircraftData* Aircraft::shared_memory = nullptr;
+Airspace* Aircraft::shared_memory = nullptr;
 int Aircraft::aircraft_index = 0;
 
 Aircraft::Aircraft(time_t entryTime,
@@ -20,7 +20,7 @@ Aircraft::Aircraft(time_t entryTime,
 				   double speedX,
 				   double speedY,
 				   double speedZ,
-				   AircraftData* shared_mem):
+				   Airspace* shared_mem):
 								   entryTime(entryTime),
 								   id(id),
 						   	   	   speedX(speedX),
@@ -35,17 +35,17 @@ Aircraft::Aircraft(time_t entryTime,
 
 	// Shared memory shouldn't be inserted until entry time has occured
 
-	if (Aircraft::shared_memory == nullptr){Aircraft::shared_memory = shared_mem;}
+	if (Aircraft::shared_memory == nullptr){ Aircraft::shared_memory = shared_mem; }
 
 	std::cout << "[Aircraft] Using Shared Memory Address: " << Aircraft::shared_memory << std::endl;
 
 	lastupdatedTime = time(NULL);
 
-	Aircraft::shared_memory[shm_index] = {entryTime, lastupdatedTime, id, x, y, z, speedX, speedY, speedZ, true, true};
+	Aircraft::shared_memory->aircraft_data[shm_index] = {entryTime, lastupdatedTime, id, x, y, z, speedX, speedY, speedZ, true, true};
 
 	std::cout << "Aircraft Created: " << id
-	          << " Stored at: " << &Aircraft::shared_memory[shm_index]
-	          << " ID in Memory: " << Aircraft::shared_memory[shm_index].id
+	          << " Stored at: " << &Aircraft::shared_memory->aircraft_data[shm_index]
+	          << " ID in Memory: " << Aircraft::shared_memory->aircraft_data[shm_index].id
 	          << std::endl;
 
 	aircraft_index++;
@@ -63,10 +63,16 @@ void* Aircraft::updatePositionThread(void* arg) {
     while (aircraft->running) {
         std::lock_guard<std::mutex> guard(aircraft->lock);
 
-        Aircraft::shared_memory[aircraft->shm_index].x += aircraft->speedX;
-        Aircraft::shared_memory[aircraft->shm_index].y += aircraft->speedY;
-        Aircraft::shared_memory[aircraft->shm_index].z += aircraft->speedZ;
-        Aircraft::shared_memory[aircraft->shm_index].lastupdatedTime = time(nullptr);
+        // Acquire lock on shared memory mutex
+        pthread_mutex_lock(&shared_memory->lock);
+
+        Aircraft::shared_memory->aircraft_data[aircraft->shm_index].x += aircraft->speedX;
+        Aircraft::shared_memory->aircraft_data[aircraft->shm_index].y += aircraft->speedY;
+        Aircraft::shared_memory->aircraft_data[aircraft->shm_index].z += aircraft->speedZ;
+        Aircraft::shared_memory->aircraft_data[aircraft->shm_index].lastupdatedTime = time(nullptr);
+
+        // Unlock shared memory
+        pthread_mutex_unlock(&shared_memory->lock);
 
         nanosleep(&req, NULL);
     }

@@ -2,12 +2,12 @@
 
 #include <sys/dispatch.h>
 #include "aircraft_data.h"
-
+#include "airspace.h"
 
 class Aircraft {
 
 private:
-	static AircraftData* shared_memory;
+	static Airspace* shared_memory;
 	static int aircraft_index;
 
 public:
@@ -28,7 +28,7 @@ public:
 			 double speedX,
 			 double speedY,
 			 double speedZ,
-			 AircraftData* shared_mem);
+			 Airspace* shared_mem);
 
 	~Aircraft();
 
