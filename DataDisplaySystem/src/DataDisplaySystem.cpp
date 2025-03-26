@@ -75,78 +75,34 @@ void drawAirspace() {
     // TODO: Consider copying from shared memory and then releasing lock and
     //       doing calculations after to not monopolize shm
     for (int i = 0; i < airspace->aircraft_count; ++i) {
-        if (!airspace->aircraft_data[i].detected){
-        	continue;
-        }
+        AircraftData& aircraft = airspace->aircraft_data[i];
 
-        activeAircrafts.push_back(airspace->aircraft_data[i]);
+        if (!aircraft.detected) continue;
+        if (aircraft.z < 15000 || aircraft.z > 25000) continue;
 
-        int x = static_cast<int>((airspace->aircraft_data[i].x / AIRSPACE_WIDTH) * DISPLAY_WIDTH);
-        int y = static_cast<int>((airspace->aircraft_data[i].y / AIRSPACE_HEIGHT) * DISPLAY_HEIGHT);
+        int x = static_cast<int>((aircraft.x / AIRSPACE_WIDTH) * DISPLAY_WIDTH);
+        int y = static_cast<int>((aircraft.y / AIRSPACE_HEIGHT) * DISPLAY_HEIGHT);
 
-        if (airspace->aircraft_data[i].z < 15000 && airspace->aircraft_data[i].z > 25000){
-        	activeAircrafts.erase(
-        	    std::remove_if(
-        	        activeAircrafts.begin(),
-        	        activeAircrafts.end(),
-        	        [&](const AircraftData& a) {
-        	            return a.id == airspace->aircraft_data[i].id;
-        	        }
-        	    ),
-        	    activeAircrafts.end()
-        	);
-        }
+        if (x == 0) x = 1;
+        if (y < 1) y = 2;
 
-        if (x == 0 ){
-        	x = 1;
-        }
+        if (x >= 0 && x < DISPLAY_WIDTH && y >= 1 && y < DISPLAY_HEIGHT) {
+            activeAircrafts.push_back(aircraft);  // ✅ Only push if valid for display
 
-        if (y < 1){
-        	y = 2;
-        }
-
-        if (x >= 0 && x < DISPLAY_WIDTH && y >= 1 && y < DISPLAY_HEIGHT
-        	&& (airspace->aircraft_data[i].z >= 15000 && airspace->aircraft_data[i].z <= 25000)) {
-            std::string idStr = std::to_string(airspace->aircraft_data[i].id);
-            int len = idStr.length();
-
-            int startX = x - len / 2;
-
-            bool tag_space_available = true;
-
-            for (int h = 0; h < len; ++h) {
-                int charX = startX + h;
-                if (charX < 0 || charX >= DISPLAY_WIDTH || screen[y - 1][charX] != '.') {
-                    tag_space_available = false;
-                    break;
-                }
+            // Assign BLIP symbol if new
+            if (blipMap.find(aircraft.id) == blipMap.end()) {
+                blipMap[aircraft.id] = 'a' + i;
             }
 
-			if (tag_space_available){
-				for (int j = 0; j < len; ++j) {
-					int charX = startX + j;
-					if (charX >= 0 && charX < DISPLAY_WIDTH) {
-//						screen[y - 1][charX] = idStr[j]; //TODO: floating ID's above
-					}
-				}
-
-			}
-//			screen[y][x] = '+';
-
-			if (blipMap.find(airspace->aircraft_data[i].id) == blipMap.end()) {
-			    blipMap[airspace->aircraft_data[i].id] = 'a' + i;
-			}
-
-			if (screen[y][x] == '.'){
-				screen[y][x] = blipMap[airspace->aircraft_data[i].id];
-			}
-			else{
-				screen[y][x] = '+';
-			}
-
-
+            // Draw onto screen grid
+            if (screen[y][x] == '.') {
+                screen[y][x] = blipMap[aircraft.id];
+            } else {
+                screen[y][x] = '+'; // Collision indicator
+            }
         }
     }
+
 
     // Draw Top Border
        for (int col = 0; col < (DISPLAY_WIDTH * 2) + 31; ++col) std::cout << "=";
@@ -261,7 +217,7 @@ int main() {
         if (now - lastUpdate >= 1) {
         	clearScreen();
             drawAirspace();
-            promptAndSendCommand();
+
             lastUpdate = now;
         }
         usleep(100000);
