@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/dispatch.h>
 #include <unistd.h>
 #include <ctime>
 #include <vector>
@@ -12,6 +13,7 @@
 #include <map>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
+#include "../../DataTypes/operator_command.h"
 
 #define AIRSPACE_WIDTH 100000
 #define AIRSPACE_HEIGHT 100000
@@ -20,6 +22,7 @@
 
 Airspace* airspace = nullptr;
 std::map<int, char> blipMap;
+int operator_coid = -1;
 
 void clearScreen() {
     for (int i = 0; i < 24; ++i)
@@ -27,24 +30,28 @@ void clearScreen() {
 }
 
 void connectToSharedMemory() {
-    int shm_fd = shm_open(AIRSPACE_SHM_NAME, O_RDONLY, 0666);
-    if (shm_fd == -1) {
-        std::cerr << "Failed to open shared memory" << std::endl;
-        exit(1);
-    }
+    std::cout << "[DataDisplaySystem] Waiting for Airspace shared memory to be created...\n";
+    while (true) {
+        int shm_fd = shm_open(AIRSPACE_SHM_NAME, O_RDONLY, 0666);
+        if (shm_fd == -1) {
+            sleep(1);
+            continue;
+        }
 
-    void* addr = mmap(nullptr, sizeof(Airspace), PROT_READ, MAP_SHARED,
-    		          shm_fd, 0);
-    if (addr == MAP_FAILED) {
-        std::cerr << "Failed to map shared memory" << std::endl;
+        void* addr = mmap(nullptr, sizeof(Airspace), PROT_READ, MAP_SHARED, shm_fd, 0);
+        if (addr == MAP_FAILED) {
+            close(shm_fd);
+            sleep(1);
+            continue;
+        }
+
+        airspace = static_cast<Airspace*>(addr);
+        std::cout << "[DataDisplaySystem] Shared memory successfully mapped\n";
         close(shm_fd);
-        exit(1);
+        break;
     }
-
-    airspace = static_cast<Airspace*>(addr);
-    std::cout << "[DataDisplaySystem] Shared memory successfully mapped\n";
-    close(shm_fd);
 }
+
 
 char getDirectionArrow(float vx, float vy) {
     if (vx == 0 && vy > 0) return '^';
@@ -207,14 +214,54 @@ void drawAirspace() {
        std::cout << "===\n";
   }
 
+void setupOperatorConsoleConnection() {
+	operator_coid = name_open(OPERATOR_CONSOLE_CHANNEL_NAME, 0);
+	if (operator_coid == -1) {
+	    perror("name_open failed");
+	    exit(1);
+	}
+
+    std::cout << "[DataDisplay] Connected to OperatorConsole channel.\n";
+}
+
+void promptAndSendCommand() {
+    std::string input;
+    std::cout << "\n[Operator Console] > ";
+    std::getline(std::cin, input);
+
+    if (input.empty()) return;
+
+    if (operator_coid != -1) {
+        int status = MsgSend(operator_coid, input.c_str(), input.size() + 1, nullptr, 0);
+        if (status == -1) {
+            perror("[DataDisplay] Failed to send message to OperatorConsole");
+        } else {
+            std::cout << "[DataDisplay] Command sent successfully.\n";
+        }
+    }
+}
+
+void* commandInputThread(void*) {
+    while (true) {
+        promptAndSendCommand();
+        usleep(100000);
+    }
+    return nullptr;
+}
+
+
 int main() {
     connectToSharedMemory();
+    setupOperatorConsoleConnection();
     std::time_t lastUpdate = 0;
+    pthread_t inputThread;
+    pthread_create(&inputThread, nullptr, commandInputThread, nullptr);
     while (true) {
         std::time_t now = std::time(nullptr);
         if (now - lastUpdate >= 1) {
         	clearScreen();
             drawAirspace();
+            promptAndSendCommand();
             lastUpdate = now;
         }
         usleep(100000);
