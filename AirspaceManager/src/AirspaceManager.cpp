@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <utility>
 #include <vector>
+#include <signal.h>
 #include <regex>
 #include "../../DataTypes/aircraft.h"
 #include "../../DataTypes/aircraft_data.h"
@@ -137,7 +138,12 @@ void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
 
 	close(shm_fd);
 
-	shm_unlink(shm_name);
+	if (shm_unlink(shm_name) == 0) {
+		std::cout << "Shared memory unlinked successfully." << std::endl;
+	} else {
+		perror("shm_unlink failed");
+	}
+
 }
 
 void verify_aircraft_data() {
@@ -150,11 +156,11 @@ void verify_aircraft_data() {
 
         if (aircraft->id == 0) continue;
 
-        cout << "Aircraft ID: " << aircraft->id
-        		  << " Entry Time: " << aircraft->entryTime
-                  << " Position: (" << aircraft->x << ", " << aircraft->y << ", " << aircraft->z << ")"
-                  << " Speed: (" << aircraft->speedX << ", " << aircraft->speedY << ", " << aircraft->speedZ << ")"
-                  << " Stored at: " << &airspace->aircraft_data[i] << endl;
+//        cout << "Aircraft ID: " << aircraft->id
+//        		  << " Entry Time: " << aircraft->entryTime
+//                  << " Position: (" << aircraft->x << ", " << aircraft->y << ", " << aircraft->z << ")"
+//                  << " Speed: (" << aircraft->speedX << ", " << aircraft->speedY << ", " << aircraft->speedZ << ")"
+//                  << " Stored at: " << &airspace->aircraft_data[i] << endl;
 
     }
 
@@ -162,7 +168,7 @@ void verify_aircraft_data() {
 }
 
 void spawn_aircrafts_by_time() {
-    std::cout << "[Simulator] Starting timed aircraft injection...\n";
+    std::cout << "[Airspace Manager] Starting timed aircraft injection...\n";
     size_t nextAircraftIndex = 0;
 
     while (nextAircraftIndex < aircraft_queue.size()) {
@@ -172,8 +178,8 @@ void spawn_aircrafts_by_time() {
         if (currentTime >= aircraft_queue[nextAircraftIndex].first) {
             const AircraftData& data = aircraft_queue[nextAircraftIndex].second;
 
-            std::cout << "[Simulator] Injecting aircraft ID: " << data.id
-                      << " at time: " << currentTime << std::endl;
+//            std::cout << "[AirspaceManager] Injecting aircraft ID: " << data.id
+//                      << " at time: " << currentTime << std::endl;
 
             Aircraft* a = new Aircraft(data.entryTime,
                                        data.id,
@@ -193,7 +199,7 @@ void spawn_aircrafts_by_time() {
         usleep(100000);
     }
 
-    std::cout << "[Simulator] All aircrafts injected.\n";
+    std::cout << "[Airspace Manager] All aircrafts injected.\n";
 }
 
 
@@ -204,6 +210,17 @@ void start_aircrafts() {
 	}
 }
 
+void handle_termination(int signum) {
+    std::cout << "[AirspaceManager]" << signum << ", cleaning up...\n";
+    cleanup_shared_memory(AIRSPACE_SHM_NAME, shm_fd, (void*) airspace, sizeof(Airspace));
+    exit(0);
+}
+
+void setup_signal_handlers() {
+    signal(SIGINT, handle_termination);   // Ctrl+C
+    signal(SIGTERM, handle_termination);  // kill
+}
+
 void cleanUpOnExit() {
 	for (Aircraft *a : active_aircrafts) {
 		delete a;
@@ -212,7 +229,7 @@ void cleanUpOnExit() {
 }
 
 int main() {
-
+	setup_signal_handlers();
 	airspace = init_shared_memory();
 
 	load_aircraft_data_from_file("/tmp/aircraft_data.txt");
@@ -232,9 +249,8 @@ int main() {
 		              return a.first < b.first;
 		          });
 
-	cout << "Press Enter to start airspace simulation..." << endl;
-	cin.get();
-
+//	cout << "Press Enter to start airspace simulation..." << endl;
+//	cin.get();
 
 	spawn_aircrafts_by_time();
 

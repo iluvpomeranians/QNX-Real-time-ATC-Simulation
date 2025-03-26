@@ -17,6 +17,29 @@ int shm_fd_airspace;
 pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t airspace_thread;
 
+
+Airspace* init_airspace_shared_memory() {
+    std::cout << "[RadarSubsystem] Waiting for Airspace shared memory to become available...\n";
+
+    while (true) {
+        shm_fd_airspace = shm_open(AIRSPACE_SHM_NAME, O_RDWR, 0666);
+        if (shm_fd_airspace != -1) {
+            break;
+        }
+        sleep(1);
+    }
+
+    void* addr = mmap(NULL, sizeof(Airspace), PROT_READ | PROT_WRITE,
+                      MAP_SHARED, shm_fd_airspace, 0);
+    if (addr == MAP_FAILED) {
+        perror("mmap failed for aircraft data");
+        exit(1);
+    }
+
+    std::cout << "[RadarSubsystem] Connected to Airspace shared memory at " << addr << "\n";
+    return static_cast<Airspace*>(addr);
+}
+
 void* updateAirspaceDetectionThread(void* arg) {
 	struct timespec req;
 		    req.tv_sec = 1;         // 1 second
@@ -48,31 +71,22 @@ void cleanUpOnExit() {
 }
 
 int main() {
-    std::cout << "Connecting to Airspace Shared Memory...\n";
 
-    shm_fd_airspace = shm_open(AIRSPACE_SHM_NAME, O_RDWR, 0666);
-    if (shm_fd_airspace == -1) {
-        perror("shm_open failed for aircraft data");
-        return 1;
-    }
-
-    airspace = (Airspace*)mmap(NULL, sizeof(Airspace), PROT_READ | PROT_WRITE,
-                               MAP_SHARED, shm_fd_airspace, 0);
-
-    if (airspace == MAP_FAILED) {
-        perror("mmap failed for aircraft data");
-        return 1;
-    }
+    airspace = init_airspace_shared_memory();
 
     std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << airspace
               << std::endl;
 
 	pthread_create(&airspace_thread, nullptr, updateAirspaceDetectionThread, NULL);
 
+	struct timespec req;
+			    req.tv_sec = 10;
+			    req.tv_nsec = 0;
+
 
     std::cout << "Radar System initialized. Shared memory ready.\n";
 
-    while (true) sleep(10);
+    while (true) nanosleep(&req, NULL);
 
     munmap(airspace, sizeof(Airspace));
     close(shm_fd_airspace);
