@@ -164,7 +164,7 @@ void* violationCheck(void* arg) {
 
 
 int main() {
-    int shm_fd = shm_open(SHM_NAME, O_RDWR, 0666);
+    int shm_fd = shm_open(AIRSPACE_SHM_NAME, O_RDWR, 0666);
     if (shm_fd == -1) {
         perror("shm_open failed");
         return 1;
