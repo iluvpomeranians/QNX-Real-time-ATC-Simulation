@@ -21,7 +21,7 @@ vector<Aircraft*> active_aircrafts;
 Airspace* init_shared_memory() {
 	cout << "Initializing Shared Memory..." << endl;
 
-	shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
+	shm_fd = shm_open(AIRSPACE_SHM_NAME, O_CREAT | O_RDWR, 0666);
 	if (shm_fd == -1) {
 		perror("shm_open failed");
 		exit(EXIT_FAILURE);
@@ -222,6 +222,9 @@ int main() {
 	// Create Aircraft instance and start thread
 
 	// sleep
+
+	cout << "Press Enter to end airspace simulation..." << endl;
+	cin.get();
 
 	// Create funtion to unmap and unlink shared memory
 	cleanup_shared_memory(AIRSPACE_SHM_NAME, shm_fd, (void *)airspace,
