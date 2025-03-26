@@ -1,21 +1,13 @@
 #pragma once
 
-#include "aircraft_data.h"
-#include <pthread.h>
-#include <sys/neutrino.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <iostream>
 #include <sys/dispatch.h>
-#include <mutex>
-#include <time.h>
+#include "aircraft_data.h"
+#include "airspace.h"
 
 class Aircraft {
 
 private:
-	static AircraftData* shared_memory;
+	static Airspace* shared_memory;
 	static int aircraft_index;
 
 public:
@@ -36,7 +28,7 @@ public:
 			 double speedX,
 			 double speedY,
 			 double speedZ,
-			 AircraftData* shared_mem);
+			 Airspace* shared_mem);
 
 	~Aircraft();
 

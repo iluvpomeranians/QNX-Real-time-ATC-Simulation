@@ -10,7 +10,6 @@
 
 #include <time.h>
 
-#define SHM_NAME "/air_traffic_shm"
 #define MAX_AIRCRAFT 100
 
 struct AircraftData {
