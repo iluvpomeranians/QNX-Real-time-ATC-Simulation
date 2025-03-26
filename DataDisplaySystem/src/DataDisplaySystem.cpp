@@ -217,7 +217,7 @@ int main() {
         if (now - lastUpdate >= 1) {
         	clearScreen();
             drawAirspace();
-
+//            promptAndSendCommand();
             lastUpdate = now;
         }
         usleep(100000);
