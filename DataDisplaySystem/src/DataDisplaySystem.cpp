@@ -11,13 +11,14 @@
 #include <sstream>
 #include <map>
 #include "../../DataTypes/aircraft_data.h"
+#include "../../DataTypes/airspace.h"
 
 #define AIRSPACE_WIDTH 100000
 #define AIRSPACE_HEIGHT 100000
 #define DISPLAY_WIDTH 50
 #define DISPLAY_HEIGHT 14
 
-AircraftData* aircrafts = nullptr;
+Airspace* airspace = nullptr;
 std::map<int, char> blipMap;
 
 void clearScreen() {
@@ -26,21 +27,21 @@ void clearScreen() {
 }
 
 void connectToSharedMemory() {
-    int shm_fd = shm_open(SHM_NAME, O_RDONLY, 0666);
+    int shm_fd = shm_open(AIRSPACE_SHM_NAME, O_RDONLY, 0666);
     if (shm_fd == -1) {
         std::cerr << "Failed to open shared memory" << std::endl;
         exit(1);
     }
 
-    void* addr = mmap(nullptr, sizeof(AircraftData) * MAX_AIRCRAFT,
-                      PROT_READ, MAP_SHARED, shm_fd, 0);
+    void* addr = mmap(nullptr, sizeof(Airspace), PROT_READ, MAP_SHARED,
+    		          shm_fd, 0);
     if (addr == MAP_FAILED) {
         std::cerr << "Failed to map shared memory" << std::endl;
         close(shm_fd);
         exit(1);
     }
 
-    aircrafts = static_cast<AircraftData*>(addr);
+    airspace = static_cast<Airspace*>(addr);
     std::cout << "[DataDisplaySystem] Shared memory successfully mapped\n";
     close(shm_fd);
 }
@@ -63,23 +64,26 @@ void drawAirspace() {
     std::vector<AircraftData> activeAircrafts;
 
     activeAircrafts.clear();
-    for (int i = 0; i < MAX_AIRCRAFT; ++i) {
-        if (!aircrafts[i].detected){
+
+    // TODO: Consider copying from shared memory and then releasing lock and
+    //       doing calculations after to not monopolize shm
+    for (int i = 0; i < airspace->aircraft_count; ++i) {
+        if (!airspace->aircraft_data[i].detected){
         	continue;
         }
 
-        activeAircrafts.push_back(aircrafts[i]);
+        activeAircrafts.push_back(airspace->aircraft_data[i]);
 
-        int x = static_cast<int>((aircrafts[i].x / AIRSPACE_WIDTH) * DISPLAY_WIDTH);
-        int y = static_cast<int>((aircrafts[i].y / AIRSPACE_HEIGHT) * DISPLAY_HEIGHT);
+        int x = static_cast<int>((airspace->aircraft_data[i].x / AIRSPACE_WIDTH) * DISPLAY_WIDTH);
+        int y = static_cast<int>((airspace->aircraft_data[i].y / AIRSPACE_HEIGHT) * DISPLAY_HEIGHT);
 
-        if (aircrafts[i].z < 15000 && aircrafts[i].z > 25000){
+        if (airspace->aircraft_data[i].z < 15000 && airspace->aircraft_data[i].z > 25000){
         	activeAircrafts.erase(
         	    std::remove_if(
         	        activeAircrafts.begin(),
         	        activeAircrafts.end(),
         	        [&](const AircraftData& a) {
-        	            return a.id == aircrafts[i].id;
+        	            return a.id == airspace->aircraft_data[i].id;
         	        }
         	    ),
         	    activeAircrafts.end()
@@ -95,8 +99,8 @@ void drawAirspace() {
         }
 
         if (x >= 0 && x < DISPLAY_WIDTH && y >= 1 && y < DISPLAY_HEIGHT
-        	&& (aircrafts[i].z >= 15000 && aircrafts[i].z <= 25000)) {
-            std::string idStr = std::to_string(aircrafts[i].id);
+        	&& (airspace->aircraft_data[i].z >= 15000 && airspace->aircraft_data[i].z <= 25000)) {
+            std::string idStr = std::to_string(airspace->aircraft_data[i].id);
             int len = idStr.length();
 
             int startX = x - len / 2;
@@ -122,12 +126,12 @@ void drawAirspace() {
 			}
 //			screen[y][x] = '+';
 
-			if (blipMap.find(aircrafts[i].id) == blipMap.end()) {
-			    blipMap[aircrafts[i].id] = 'a' + i;
+			if (blipMap.find(airspace->aircraft_data[i].id) == blipMap.end()) {
+			    blipMap[airspace->aircraft_data[i].id] = 'a' + i;
 			}
 
 			if (screen[y][x] == '.'){
-				screen[y][x] = blipMap[aircrafts[i].id];
+				screen[y][x] = blipMap[airspace->aircraft_data[i].id];
 			}
 			else{
 				screen[y][x] = '+';

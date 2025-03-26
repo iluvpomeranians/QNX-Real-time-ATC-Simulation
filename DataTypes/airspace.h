@@ -9,6 +9,8 @@
 #define AIRSPACE_H_
 
 #include "aircraft_data.h"
+
+#define AIRSPACE_SHM_NAME "/airspace_shm"
 #define MAX_AIRCRAFT 100
 
 struct Airspace {

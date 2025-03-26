@@ -13,12 +13,10 @@
 
 using namespace std;
 
-#define AIRSPACE_SHM_NAME "/airspace_shm"
-
 int shm_fd;
 Airspace *airspace = nullptr;
-
 vector<pair<time_t, AircraftData>> aircraft_queue;
+vector<Aircraft*> active_aircrafts;
 
 Airspace* init_shared_memory() {
 	cout << "Initializing Shared Memory..." << endl;
@@ -104,6 +102,7 @@ void load_aircraft_data_from_file(const string &file_path) {
     }
 
     string line;
+    int aircraft_count = 0;
 
     while (getline(file, line)) {
         istringstream line_stream(line);
@@ -118,6 +117,8 @@ void load_aircraft_data_from_file(const string &file_path) {
         aircraft_data.entryTime = parseToTimeT(temp_time_str);
         aircraft_queue.emplace_back(aircraft_data.entryTime, aircraft_data);
 
+
+        // TODO: This shouldn't be here and also need to keep track of th
         Aircraft* l_aircraft = new Aircraft(aircraft_data.entryTime,
 											aircraft_data.id,
 											aircraft_data.x,
@@ -127,8 +128,15 @@ void load_aircraft_data_from_file(const string &file_path) {
 											aircraft_data.speedY,
 											aircraft_data.speedZ,
 											airspace);
-        l_aircraft->startThreads();
+        active_aircrafts.emplace_back(l_aircraft);
+        aircraft_count++;
     }
+
+    // Update number of aircrafts
+    pthread_mutex_lock(&airspace->lock);
+    airspace->aircraft_count = aircraft_count;
+    pthread_mutex_unlock(&airspace->lock);
+
     file.close();
 }
 
@@ -169,6 +177,20 @@ void verify_aircraft_data() {
     pthread_mutex_unlock(&airspace->lock);
 }
 
+// TODO: Temporary function to start all the aircrafts after key press
+void start_aircrafts() {
+	for (Aircraft *a : active_aircrafts) {
+		a->startThreads();
+	}
+}
+
+void cleanUpOnExit() {
+	for (Aircraft *a : active_aircrafts) {
+		delete a;
+	}
+	active_aircrafts.clear();
+}
+
 int main() {
 
 	airspace = init_shared_memory();
@@ -184,9 +206,11 @@ int main() {
 		if (airspace->aircraft_data[i].id == 0) continue;
 		cout << "Aircraft ID: " << airspace->aircraft_data[i].id << endl;
 	}
+
 	cout << "Press Enter to start airspace simulation..." << endl;
 	cin.get();
 
+	start_aircrafts();
 	// Start timer
 
 	// Need to create threads here for this

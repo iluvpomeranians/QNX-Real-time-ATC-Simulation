@@ -7,14 +7,15 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include "../../DataTypes/aircraft_data.h"
+#include "../../DataTypes/airspace.h"
 
-AircraftData* aircrafts_shared_memory;
+Airspace* airspace;
 pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define FUTURE_OFFSET_SEC 120
 
 struct ViolationArgs {
-    AircraftData* shm_ptr;
+    Airspace* shm_ptr;
     int total_aircraft;
     double elapsedTime;
 };
@@ -46,19 +47,23 @@ void getProjectedPosition(AircraftData& aircraft, double time) {
 
 void* checkCurrentViolations(void* args) {
     struct ViolationArgs* data = (struct ViolationArgs*) args;
-    AircraftData* shm_ptr = data->shm_ptr;
+    Airspace* l_airspace = data->shm_ptr;
+
+    // TODO: Use shared mem variable instead
     int max = data->total_aircraft;
 
     time_t now = time(NULL);
 
-    pthread_mutex_lock(&shm_mutex);
+    // TODO: Consider copying from shared memory and then releasing lock and
+    //       doing calculations after to not monopolize shm
+    pthread_mutex_lock(&airspace->lock);
 
     for (int i = 0; i < max; i++) {
-        AircraftData* a1 = &shm_ptr[i];
+        AircraftData* a1 = &l_airspace->aircraft_data[i];
         if (a1->id == 0 || now < a1->entryTime) continue;
 
         for (int j = i + 1; j < max; j++) {
-            AircraftData* a2 = &shm_ptr[j];
+            AircraftData* a2 = &l_airspace->aircraft_data[j];
             if (a2->id == 0 || now < a2->entryTime) continue;
 
             double dx = fabs(a1->x - a2->x);
@@ -77,27 +82,27 @@ void* checkCurrentViolations(void* args) {
         }
     }
 
-    pthread_mutex_unlock(&shm_mutex);
+    pthread_mutex_unlock(&airspace->lock);
     return NULL;
 }
 
 
 void* checkFutureViolations(void* args) {
     struct ViolationArgs* data = (struct ViolationArgs*) args;
-    AircraftData* shm_ptr = data->shm_ptr;
+    Airspace* l_airspace = data->shm_ptr;
     int max = data->total_aircraft;
 
     time_t now = time(NULL);
 
-    pthread_mutex_lock(&shm_mutex);
+    pthread_mutex_lock(&airspace->lock);
 
     for (int i = 0; i < max; i++) {
-        AircraftData* a1 = &shm_ptr[i];
+        AircraftData* a1 = &l_airspace->aircraft_data[i];
 
         if (a1->id == 0 || now < a1->entryTime) continue;
 
         for (int j = i + 1; j < max; j++) {
-            AircraftData* a2 = &shm_ptr[j];
+            AircraftData* a2 = &l_airspace->aircraft_data[j];
             if (a2->id == 0 || now < a2->entryTime) continue;
 
             // Project both aircraft 2 minutes ahead
@@ -126,7 +131,7 @@ void* checkFutureViolations(void* args) {
         }
     }
 
-    pthread_mutex_unlock(&shm_mutex);
+    pthread_mutex_unlock(&airspace->lock);
     return NULL;
 }
 
@@ -139,7 +144,7 @@ void* violationCheck(void* arg) {
     while (1) {
 
         struct ViolationArgs args = {
-            .shm_ptr = aircrafts_shared_memory,
+            .shm_ptr = airspace,
             .total_aircraft = MAX_AIRCRAFT,
         };
 
@@ -165,29 +170,29 @@ int main() {
         return 1;
     }
 
-    aircrafts_shared_memory = (AircraftData*) mmap(NULL,
-                                                   sizeof(AircraftData) * MAX_AIRCRAFT,
-                                                   PROT_READ | PROT_WRITE,
-                                                   MAP_SHARED,
-                                                   shm_fd, 0);
+    airspace = (Airspace*) mmap(NULL,
+                                sizeof(AircraftData) * MAX_AIRCRAFT,
+							    PROT_READ | PROT_WRITE,
+							    MAP_SHARED, shm_fd, 0);
 
-    if (aircrafts_shared_memory == MAP_FAILED) {
+    if (airspace == MAP_FAILED) {
         perror("mmap failed");
         return 1;
     }
 
     // Initialize shared memory limits
-    shm_limits_aircraft_data.lower_limit = aircrafts_shared_memory;
-    shm_limits_aircraft_data.size = sizeof(AircraftData) * MAX_AIRCRAFT;
+//    shm_limits_aircraft_data.lower_limit = aircrafts_shared_memory;
+//    shm_limits_aircraft_data.size = sizeof(AircraftData) * MAX_AIRCRAFT;
 
-    std::cout << "[ComputerSystem] Shared Memory Base Address: " << aircrafts_shared_memory << " with params: " << SHM_NAME << ", " << shm_fd << std::endl;
+    std::cout << "[ComputerSystem] Shared Memory Base Address: " << airspace << " with params: " << AIRSPACE_SHM_NAME << ", " << shm_fd << std::endl;
 
     pthread_t monitorThread;
     pthread_create(&monitorThread, NULL, violationCheck, NULL);
 
+    // TODO: Check if munmap() gets called. Killing process
     while (true) sleep(10);
 
-    munmap(aircrafts_shared_memory, sizeof(AircraftData) * MAX_AIRCRAFT);
+    munmap(airspace, sizeof(Airspace));
     close(shm_fd);
 
     return 0;

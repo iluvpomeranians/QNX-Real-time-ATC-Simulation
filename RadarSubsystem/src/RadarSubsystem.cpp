@@ -12,8 +12,8 @@
 #include "../../DataTypes/aircraft.h"
 
 Airspace* airspace = nullptr;
-std::vector<Aircraft*> activeAircrafts;
-int shm_fd_aircraft_data;
+std::vector<Aircraft*> active_aircrafts;
+int shm_fd_airspace;
 pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t airspace_thread;
 
@@ -134,8 +134,10 @@ void* updateAirspaceDetectionThread(void* arg) {
 
 	while (true) {
 		pthread_mutex_lock(&airspace->lock);
-		for(Aircraft* a : activeAircrafts) {
-			AircraftData* aircraft = &airspace->aircraft_data[a->shm_index];
+
+		// TODO: Changed the iterator here, validate that this works still
+		for(int i = 0; i < airspace->aircraft_count; ++i) {
+			AircraftData* aircraft = &airspace->aircraft_data[i];
 
 			if (aircraft->x > 100000 || aircraft->y > 100000 ||
 				aircraft->x < 0 || aircraft->y < 0 || aircraft->z > 25000 ||
@@ -151,46 +153,32 @@ void* updateAirspaceDetectionThread(void* arg) {
 	return nullptr;
 }
 
-void cleanUpOnExit(){
-	for(Aircraft* a: activeAircrafts){
-		delete a;
-	}
-
-	activeAircrafts.clear();
+void cleanUpOnExit() {
 	pthread_join(airspace_thread, nullptr);
 }
 
 int main() {
     std::cout << "Connecting to Airspace Shared Memory...\n";
 
-    // TODO: Change from init to connect
-    shm_fd_aircraft_data = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
-    if (shm_fd_aircraft_data == -1) {
+    shm_fd_airspace = shm_open(AIRSPACE_SHM_NAME, O_RDWR, 0666);
+    if (shm_fd_airspace == -1) {
         perror("shm_open failed for aircraft data");
         return 1;
     }
 
-    if (ftruncate(shm_fd_aircraft_data, sizeof(AircraftData) * MAX_AIRCRAFT) == -1) {
-        perror("ftruncate failed for aircraft data");
-        return 1;
-    }
+    airspace = (Airspace*)mmap(NULL, sizeof(Airspace), PROT_READ | PROT_WRITE,
+                               MAP_SHARED, shm_fd_airspace, 0);
 
-    aircrafts_shared_memory = (AircraftData*) mmap(NULL,
-                                                   sizeof(AircraftData) * MAX_AIRCRAFT,
-                                                   PROT_READ | PROT_WRITE,
-                                                   MAP_SHARED,
-                                                   shm_fd_aircraft_data, 0);
-
-    if (aircrafts_shared_memory == MAP_FAILED) {
+    if (airspace == MAP_FAILED) {
         perror("mmap failed for aircraft data");
         return 1;
     }
 
-    // Store the shared memory limits for aircraft data
-    shm_limits_aircraft_data.lower_limit = aircrafts_shared_memory;
-    shm_limits_aircraft_data.size = sizeof(AircraftData) * MAX_AIRCRAFT;
+//    // Store the shared memory limits for aircraft data
+//    shm_limits_aircraft_data.lower_limit = aircrafts_shared_memory;
+//    shm_limits_aircraft_data.size = sizeof(AircraftData) * MAX_AIRCRAFT;
 
-    std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << aircrafts_shared_memory
+    std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << airspace
               << std::endl;
 
 	pthread_create(&airspace_thread, nullptr, updateAirspaceDetectionThread, NULL);
@@ -214,7 +202,7 @@ int main() {
     while (true) sleep(10);
 
     munmap(airspace, sizeof(Airspace));
-    close(shm_fd_aircraft_data);
+    close(shm_fd_airspace);
 
     cleanUpOnExit();
 
