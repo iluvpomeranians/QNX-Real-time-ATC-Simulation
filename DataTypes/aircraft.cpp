@@ -33,8 +33,6 @@ Aircraft::Aircraft(time_t entryTime,
 								   shm_index(aircraft_index)
 								   {
 
-	// Shared memory shouldn't be inserted until entry time has occured
-
 	if (Aircraft::shared_memory == nullptr){ Aircraft::shared_memory = shared_mem; }
 
 	std::cout << "[Aircraft] Using Shared Memory Address: " << Aircraft::shared_memory << std::endl;
@@ -61,8 +59,6 @@ void* Aircraft::updatePositionThread(void* arg) {
     req.tv_nsec = 0;        // 0 nanoseconds
 
     while (aircraft->running) {
-    	// TODO: Schedule for delete
-        std::lock_guard<std::mutex> guard(aircraft->lock);
 
         // Acquire lock on shared memory mutex
         pthread_mutex_lock(&shared_memory->lock);

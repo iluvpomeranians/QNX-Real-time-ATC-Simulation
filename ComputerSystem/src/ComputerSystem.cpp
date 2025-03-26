@@ -20,12 +20,6 @@ struct ViolationArgs {
     double elapsedTime;
 };
 
-struct SharedMemoryLimits {
-    void* lower_limit;  // Pointer to the start of shared memory
-    size_t size;        // Size of the shared memory
-};
-
-SharedMemoryLimits shm_limits_aircraft_data;
 
 void sendAlert(int aircraft1, int aircraft2) {
 	std::cout << "[ALERT]: Aircraft " << aircraft1
@@ -179,10 +173,6 @@ int main() {
         perror("mmap failed");
         return 1;
     }
-
-    // Initialize shared memory limits
-//    shm_limits_aircraft_data.lower_limit = aircrafts_shared_memory;
-//    shm_limits_aircraft_data.size = sizeof(AircraftData) * MAX_AIRCRAFT;
 
     std::cout << "[ComputerSystem] Shared Memory Base Address: " << airspace << " with params: " << AIRSPACE_SHM_NAME << ", " << shm_fd << std::endl;
 

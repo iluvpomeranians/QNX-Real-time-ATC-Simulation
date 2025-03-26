@@ -116,19 +116,6 @@ void load_aircraft_data_from_file(const string &file_path) {
 
         aircraft_data.entryTime = parseToTimeT(temp_time_str);
         aircraft_queue.emplace_back(aircraft_data.entryTime, aircraft_data);
-
-
-        // TODO: This shouldn't be here and also need to keep track of th
-        Aircraft* l_aircraft = new Aircraft(aircraft_data.entryTime,
-											aircraft_data.id,
-											aircraft_data.x,
-											aircraft_data.y,
-											aircraft_data.z,
-											aircraft_data.speedX,
-											aircraft_data.speedY,
-											aircraft_data.speedZ,
-											airspace);
-        active_aircrafts.emplace_back(l_aircraft);
         aircraft_count++;
     }
 
@@ -142,17 +129,14 @@ void load_aircraft_data_from_file(const string &file_path) {
 
 void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
 						   size_t size) {
-	// Unmap shared memory from process address space
 	if (munmap(addr, size) == 0) {
 		cout << "Shared memory unmapped successfully." << endl;
 	} else {
 		perror("munmap failed");
 	}
 
-	// Close the shared mem file descriptor
 	close(shm_fd);
 
-	// Remove shared memory name from system
 	shm_unlink(shm_name);
 }
 
@@ -177,6 +161,42 @@ void verify_aircraft_data() {
     pthread_mutex_unlock(&airspace->lock);
 }
 
+void spawn_aircrafts_by_time() {
+    std::cout << "[Simulator] Starting timed aircraft injection...\n";
+    size_t nextAircraftIndex = 0;
+
+    while (nextAircraftIndex < aircraft_queue.size()) {
+        time_t currentTime = time(nullptr);
+
+        // Check if it's time to inject the next aircraft
+        if (currentTime >= aircraft_queue[nextAircraftIndex].first) {
+            const AircraftData& data = aircraft_queue[nextAircraftIndex].second;
+
+            std::cout << "[Simulator] Injecting aircraft ID: " << data.id
+                      << " at time: " << currentTime << std::endl;
+
+            Aircraft* a = new Aircraft(data.entryTime,
+                                       data.id,
+                                       data.x,
+                                       data.y,
+                                       data.z,
+                                       data.speedX,
+                                       data.speedY,
+                                       data.speedZ,
+                                       airspace);
+            active_aircrafts.push_back(a);
+            a->startThreads();
+
+            nextAircraftIndex++;
+        }
+
+        usleep(100000);
+    }
+
+    std::cout << "[Simulator] All aircrafts injected.\n";
+}
+
+
 // TODO: Temporary function to start all the aircrafts after key press
 void start_aircrafts() {
 	for (Aircraft *a : active_aircrafts) {
@@ -199,34 +219,29 @@ int main() {
 	sleep(1);
 	verify_aircraft_data();
 
-	// Sort the aircraft in queue according to entry time
-
 	cout << "\nIterating through aircraft data using shared memory limits:\n";
 	for (size_t i = 0; i < MAX_AIRCRAFT; i++) {
 		if (airspace->aircraft_data[i].id == 0) continue;
 		cout << "Aircraft ID: " << airspace->aircraft_data[i].id << endl;
 	}
 
+	// Sort the aircraft in queue according to entry time
+	std::sort(aircraft_queue.begin(), aircraft_queue.end(),
+		          [](const std::pair<time_t, AircraftData>& a,
+		             const std::pair<time_t, AircraftData>& b) {
+		              return a.first < b.first;
+		          });
+
 	cout << "Press Enter to start airspace simulation..." << endl;
 	cin.get();
 
-	start_aircrafts();
-	// Start timer
 
-	// Need to create threads here for this
+	spawn_aircrafts_by_time();
 
-	// Pop first airplane, set interrupt at entryTime
-
-	// handle interrupt
-
-	// Create Aircraft instance and start thread
-
-	// sleep
 
 	cout << "Press Enter to end airspace simulation..." << endl;
 	cin.get();
 
-	// Create funtion to unmap and unlink shared memory
 	cleanup_shared_memory(AIRSPACE_SHM_NAME, shm_fd, (void *)airspace,
 						  sizeof(Airspace));
 	return 0;
