@@ -6,21 +6,30 @@
 #include <fstream>
 #include <unistd.h>
 #include <stdbool.h>
+#include <csignal>  // Include for signal handling
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
+#include "../../DataTypes/communication_system.h"
 
 #define FUTURE_OFFSET_SEC 120
 
 Airspace* airspace;
-pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
 OperatorCommandMemory* operator_commands = nullptr;
+
+int comm_system_pid = 0;  // Process ID for the CommunicationSystem
 
 struct ViolationArgs {
     Airspace* shm_ptr;
     int total_aircraft;
     double elapsedTime;
 };
+
+// Signal handler for CommunicationSystem
+void handle_communication_signal(int signal) {
+    // Handle the signal in CommunicationSystem (e.g., start polling shared memory)
+    std::cout << "[ComputerSystem] Received signal to notify CommunicationSystem to poll shared memory." << std::endl;
+}
 
 OperatorCommandMemory* init_operator_command_memory() {
 
@@ -58,6 +67,21 @@ void* pollOperatorCommands(void* arg) {
 
     std::cout << "[ComputerSystem] Polling Operator Commands...\n";
 
+    // Add shared memory for communication
+    int comm_fd = shm_open(COMMUNICATION_COMMAND_SHM_NAME, O_RDWR, 0666);
+    if (comm_fd == -1) {
+        perror("shm_open failed for communication commands");
+        exit(EXIT_FAILURE);
+    }
+
+    void* addr = mmap(NULL, sizeof(CommunicationCommandMemory), PROT_READ | PROT_WRITE, MAP_SHARED, comm_fd, 0);
+    if (addr == MAP_FAILED) {
+        perror("mmap failed for communication commands");
+        exit(EXIT_FAILURE);
+    }
+
+    CommunicationCommandMemory* comm_mem = static_cast<CommunicationCommandMemory*>(addr);
+
     while (true) {
         pthread_mutex_lock(&cmd_mem->lock);
 
@@ -71,6 +95,21 @@ void* pollOperatorCommands(void* arg) {
                       << std::endl;
 
             // TODO: Dispatch send(R,m) to Comm subsystem
+            // Call function to send this command to CommunicationSystem
+           //send_command_to_aircraft(cmd.aircraft_id, cmd);
+           // send signal to communication system and then communication system will poll it from shared memory
+
+            // Send the command to the Communication System's shared memory
+            pthread_mutex_lock(&comm_mem->lock);
+            comm_mem->commands[comm_mem->command_count] = cmd;
+            comm_mem->command_count++;
+            pthread_mutex_unlock(&comm_mem->lock);
+        }
+
+        // Send signal to CommunicationSystem using `raise` and `comm_system_pid`
+        if (comm_system_pid != 0) {
+            std::cout << "[ComputerSystem] Sending signal to CommunicationSystem...\n";
+            std::raise(SIGUSR1);  // Send signal to CommunicationSystem
         }
 
         // Clear command list after processing?
