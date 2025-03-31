@@ -12,13 +12,9 @@
 #include "../../DataTypes/aircraft.h"
 #include "../../DataTypes/communication_system.h"
 
-// Shared memory for operator commands
 OperatorCommandMemory* operator_cmd_mem = nullptr;
-
-// Flag to indicate that a signal was received
 volatile sig_atomic_t signal_received = 0;
 
-// Signal handler to wake up the polling thread in CommunicationSystem
 void signal_handler(int signo) {
     if (signo == SIGUSR1) {
     	signal_received = 1;  // Set flag when signal is received
@@ -31,7 +27,7 @@ void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
     char service_name[20];
     snprintf(service_name, sizeof(service_name), "Aircraft%d", aircraft_id);
 
-    int coid = name_open(service_name, 0); // Get communication ID for this aircraft
+    int coid = name_open(service_name, 0);
     if (coid == -1) {
         perror("[CommunicationSystem] Failed to connect to aircraft IPC channel");
         return;
@@ -57,9 +53,8 @@ void* pollOperatorCommands(void* arg) {
 
     while (true) {
 
-    	// Wait for signal that commands are available
         while (!signal_received) { // Busy-wait for the signal
-            usleep(1000);  // Sleep briefly to prevent 100% CPU usage in this loop
+            usleep(1000);
         }
 
         signal_received = 0;  // Reset the flag after handling the signal
@@ -84,7 +79,7 @@ void* pollOperatorCommands(void* arg) {
 
         pthread_mutex_unlock(&cmd_mem->lock);
 
-        sleep(1);  // Sleep for a bit before polling again
+        sleep(1);
     }
 
     return NULL;
@@ -114,13 +109,12 @@ int main() {
     }
 
     std::cout << "[CommunicationSystem] Connected to operator command shared memory." << std::endl;
-    close(shm_fd_cmd); // Close the shared memory descriptor as we are done with it
+    close(shm_fd_cmd);
 
     // Start the command polling thread to handle commands from the computer system
     pthread_t command_thread;
     pthread_create(&command_thread, NULL, pollOperatorCommands, operator_cmd_mem);
 
-    // Running indefinitely to poll commands and send them to the aircraft
     while (true) {
         sleep(1);
     }

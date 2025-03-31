@@ -8,6 +8,7 @@
 #include <mutex>
 #include <time.h>
 #include "aircraft.h"
+#include "operator_command.h"
 
 Airspace* Aircraft::shared_memory = nullptr;
 int Aircraft::aircraft_index = 0;
@@ -60,16 +61,13 @@ void* Aircraft::updatePositionThread(void* arg) {
 
     while (aircraft->running) {
 
-        // Acquire lock on shared memory mutex
         pthread_mutex_lock(&shared_memory->lock);
 
-        // Update aircraft position based on speed
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].x += aircraft->speedX;
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].y += aircraft->speedY;
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].z += aircraft->speedZ;
         Aircraft::shared_memory->aircraft_data[aircraft->shm_index].lastupdatedTime = time(nullptr);
 
-        // Unlock shared memory
         pthread_mutex_unlock(&shared_memory->lock);
 
         nanosleep(&req, NULL);
@@ -128,13 +126,13 @@ void* Aircraft::messageHandlerThread(void* arg){
 
 void Aircraft::startThreads(){
 	pthread_create(&position_thread, nullptr, updatePositionThread, this);
-	//pthread_create(&ipc_thread, nullptr, messageHandlerThread, this);
+	pthread_create(&ipc_thread, nullptr, messageHandlerThread, this);
 }
 
 void Aircraft::stopThreads(){
 	running = false;
 	pthread_join(position_thread, nullptr);
-	//pthread_join(ipc_thread, nullptr);
+	pthread_join(ipc_thread, nullptr);
 }
 
 Aircraft::~Aircraft(){

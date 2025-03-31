@@ -87,18 +87,17 @@ void drawAirspace() {
         if (y < 1) y = 2;
 
         if (x >= 0 && x < DISPLAY_WIDTH && y >= 1 && y < DISPLAY_HEIGHT) {
-            activeAircrafts.push_back(aircraft);  // ✅ Only push if valid for display
+            activeAircrafts.push_back(aircraft);
 
             // Assign BLIP symbol if new
             if (blipMap.find(aircraft.id) == blipMap.end()) {
                 blipMap[aircraft.id] = 'a' + i;
             }
 
-            // Draw onto screen grid
             if (screen[y][x] == '.') {
                 screen[y][x] = blipMap[aircraft.id];
             } else {
-                screen[y][x] = '+'; // Collision indicator
+                screen[y][x] = '+';
             }
         }
     }
