@@ -93,34 +93,24 @@ void* Aircraft::messageHandlerThread(void* arg){
 
 	std::cout << "[Aircraft " << aircraft->id << "] IPC channel registration: " << service_name << std::endl;
 
-	struct {
-        struct _pulse pulse;
-        OperatorCommand cmd;
-    } msg;
-
     while(aircraft->running){
-        int rcvid = MsgReceive(aircraft->attach->chid, &msg, sizeof(msg), NULL);
-        if (rcvid == -1) {
-            perror("MsgReceive");
-            continue;
-        }
-        if (rcvid > 0){
-            std::cout << "[Aircraft] Received command for Aircraft ID: " << msg.cmd.aircraft_id << std::endl;
-            if (msg.cmd.type == CommandType::ChangeSpeed) {
-                aircraft->speedX = msg.cmd.speed.vx;
-                aircraft->speedY = msg.cmd.speed.vy;
-                aircraft->speedZ = msg.cmd.speed.vz;
-                std::cout << "[Aircraft] Speed updated to: (" << aircraft->speedX << ", "
-                          << aircraft->speedY << ", " << aircraft->speedZ << ")" << std::endl;
-            } else if (msg.cmd.type == CommandType::ChangePosition) {
-                Aircraft::shared_memory->aircraft_data[aircraft->shm_index].x = msg.cmd.position.x;
-                Aircraft::shared_memory->aircraft_data[aircraft->shm_index].y = msg.cmd.position.y;
-                Aircraft::shared_memory->aircraft_data[aircraft->shm_index].z = msg.cmd.position.z;
-                std::cout << "[Aircraft] Position updated to: (" << msg.cmd.position.x << ", "
-                          << msg.cmd.position.y << ", " << msg.cmd.position.z << ")" << std::endl;
-            }
-            MsgReply(rcvid, 0, NULL, 0);
-        }
+    	//AircraftMsg msg;
+    	//int rcvid = MsgReceive(aircraft->attach->chid, msg, sizeof(msg), NULL);
+
+    	//if (rcvid == -1) {
+		//	perror("MsgReceive");
+		//	continue;
+		//}
+
+    	//if (rcvid > 0){
+    		//TODO: will need to finish implementation for received message
+    	//}
+
+    	//AircraftMsg response;
+    	// TODO: will need to finish implementation for reply message
+    	// MsgReply(rcvid, 0, response, sizeof(response));
+
+
     }
 
 	return nullptr;
