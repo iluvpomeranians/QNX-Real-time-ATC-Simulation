@@ -111,12 +111,15 @@ void* Aircraft::messageHandlerThread(void* arg){
                 std::cout << "[Aircraft] Speed updated to: (" << aircraft->speedX << ", "
                           << aircraft->speedY << ", " << aircraft->speedZ << ")" << std::endl;
             } else if (msg.cmd.type == CommandType::ChangePosition) {
+            	//TODO: possibly revise
+            	//This instantly changes the heading
                 Aircraft::shared_memory->aircraft_data[aircraft->shm_index].x = msg.cmd.position.x;
                 Aircraft::shared_memory->aircraft_data[aircraft->shm_index].y = msg.cmd.position.y;
                 Aircraft::shared_memory->aircraft_data[aircraft->shm_index].z = msg.cmd.position.z;
                 std::cout << "[Aircraft] Position updated to: (" << msg.cmd.position.x << ", "
                           << msg.cmd.position.y << ", " << msg.cmd.position.z << ")" << std::endl;
             }
+            //TODO: might have to send a reply -- ack message/signal
             MsgReply(rcvid, 0, NULL, 0);
         }
     }

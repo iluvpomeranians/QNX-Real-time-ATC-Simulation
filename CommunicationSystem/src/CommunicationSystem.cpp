@@ -6,7 +6,7 @@
 #include <sys/neutrino.h>
 #include <cstring>
 #include <ctime>
-#include <csignal>  // Include for signal handling
+#include <csignal>
 #include "../../DataTypes/operator_command.h"
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
@@ -15,15 +15,15 @@
 OperatorCommandMemory* operator_cmd_mem = nullptr;
 volatile sig_atomic_t signal_received = 0;
 
+//Tutorial #3
 void signal_handler(int signo) {
     if (signo == SIGUSR1) {
-    	signal_received = 1;  // Set flag when signal is received
+    	signal_received = 1;
     }
 }
 
 // Function to send a command to a specific aircraft via IPC
 void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
-    // Create IPC channel for the aircraft
     char service_name[20];
     snprintf(service_name, sizeof(service_name), "Aircraft%d", aircraft_id);
 
@@ -33,7 +33,6 @@ void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
         return;
     }
 
-    // Send the command over the IPC channel
     int status = MsgSend(coid, &cmd, sizeof(cmd), nullptr, 0);
     if (status == -1) {
         perror("[CommunicationSystem] Failed to send command to aircraft");
@@ -41,7 +40,6 @@ void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
         std::cout << "[CommunicationSystem] Command sent to Aircraft ID " << aircraft_id << std::endl;
     }
 
-    // Close the communication connection with the aircraft
     name_close(coid);
 }
 
@@ -70,11 +68,11 @@ void* pollOperatorCommands(void* arg) {
                       << " | Speed: (" << cmd.speed.vx << ", " << cmd.speed.vy << ", " << cmd.speed.vz << ")"
                       << std::endl;
 
-            // Send this command to the aircraft via IPC
             send_command_to_aircraft(cmd.aircraft_id, cmd);
         }
 
-        // Clear command list after processing
+        //TODO: We should run a size-check on commands[] arr to make sure it aligns
+        //with command count
         cmd_mem->command_count = 0;
 
         pthread_mutex_unlock(&cmd_mem->lock);
@@ -94,19 +92,30 @@ int main() {
     }
 
     // Connect to shared memory where the operator commands are stored
-    int shm_fd_cmd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_RDWR, 0666);
-    if (shm_fd_cmd == -1) {
-        perror("[CommunicationSystem] shm_open failed for operator commands");
-        exit(EXIT_FAILURE);
-    }
+    int shm_fd_cmd;
+    while (1) {
+        	shm_fd_cmd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_RDWR, 0666);
 
-    operator_cmd_mem = (OperatorCommandMemory*) mmap(NULL, sizeof(OperatorCommandMemory),
-                                                     PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd_cmd, 0);
-    if (operator_cmd_mem == MAP_FAILED) {
-        perror("[CommunicationSystem] mmap failed for operator command shared memory");
-        close(shm_fd_cmd);
-        exit(EXIT_FAILURE);
-    }
+            if (shm_fd_cmd != -1) {
+            	 operator_cmd_mem = (OperatorCommandMemory*) mmap(NULL,
+            			 	 	 	 	 	 	 	 	 	 	 sizeof(OperatorCommandMemory),
+            	                                                 PROT_READ | PROT_WRITE,
+																 MAP_SHARED,
+																 shm_fd_cmd, 0);
+
+            	 if (operator_cmd_mem == MAP_FAILED) {
+            	    perror("[CommunicationSystem] mmap failed for operator command shared memory");
+                    close(shm_fd_cmd);
+                    exit(EXIT_FAILURE);
+                } else {
+                    perror("[Airspace] mmap failed");
+                    close(shm_fd_cmd);
+                }
+            }
+
+            sleep(1);
+        }
+
 
     std::cout << "[CommunicationSystem] Connected to operator command shared memory." << std::endl;
     close(shm_fd_cmd);
