@@ -33,32 +33,35 @@ OperatorCommandMemory* connect_to_operator_command_memory() {
 }
 
 void handle_received_command(const std::string& raw_cmd) {
-    // Simple parser for command format:
-    // "changeSpeed 101 100 0 0"
+    const double UNSET = -1.0;
+
     std::istringstream ss(raw_cmd);
     std::string type;
     int aircraft_id;
-    double x, y, z;
+    double x = UNSET, y = UNSET, z = UNSET;
 
     ss >> type >> aircraft_id >> x >> y >> z;
 
-    OperatorCommand cmd;
+    OperatorCommand cmd = {};
+    cmd.aircraft_id = aircraft_id;
+    cmd.timestamp = time(NULL);
+
     if (type == "changeSpeed") {
         cmd.type = CommandType::ChangeSpeed;
         cmd.speed = {x, y, z};
+        cmd.position = {UNSET, UNSET, UNSET};
     } else if (type == "changePosition") {
         cmd.type = CommandType::ChangePosition;
         cmd.position = {x, y, z};
+        cmd.speed = {UNSET, UNSET, UNSET};
     } else if (type == "requestDetails") {
         cmd.type = CommandType::RequestDetails;
-        cmd.position = {0, 0, 0}; // not used
+        cmd.position = {UNSET, UNSET, UNSET};
+        cmd.speed = {UNSET, UNSET, UNSET};
     } else {
         std::cerr << "[OperatorConsole] Unknown command type: " << type << std::endl;
         return;
     }
-
-    cmd.aircraft_id = aircraft_id;
-    cmd.timestamp = time(NULL);
 
     pthread_mutex_lock(&operator_cmd_mem->lock);
     if (operator_cmd_mem->command_count < MAX_OPERATOR_COMMANDS) {
@@ -71,17 +74,9 @@ void handle_received_command(const std::string& raw_cmd) {
     pthread_mutex_unlock(&operator_cmd_mem->lock);
 }
 
-int main() {
-    operator_cmd_mem = connect_to_operator_command_memory();
 
-    // Create IPC channel
-    name_attach_t* attach = name_attach(NULL, OPERATOR_CONSOLE_CHANNEL_NAME, 0);
-    if (attach == NULL) {
-        perror("name_attach failed");
-        return 1;
-    }
-
-    std::cout << "[OperatorConsole] Listening for commands on channel ID " << attach->chid << "\n";
+void* ipcListenerThread(void* arg) {
+    name_attach_t* attach = static_cast<name_attach_t*>(arg);
 
     struct {
         struct _pulse pulse;
@@ -99,12 +94,48 @@ int main() {
 
         msg.data[255] = '\0';
         std::string received_cmd(msg.data);
-        std::cout << "[OperatorConsole] Received command: " << received_cmd << "\n";
+        std::cout << "\n[OperatorConsole] Received command via IPC: " << received_cmd << std::endl;
 
         handle_received_command(received_cmd);
-
         MsgReply(rcvid, 0, NULL, 0);
     }
 
+    return nullptr;
+}
+
+
+int main() {
+
+    operator_cmd_mem = connect_to_operator_command_memory();
+
+    // Attach channel
+    name_attach_t* attach = name_attach(NULL, OPERATOR_CONSOLE_CHANNEL_NAME, 0);
+    if (attach == NULL) {
+        perror("name_attach failed");
+        return 1;
+    }
+
+    std::cout << "[OperatorConsole] Listening for commands on channel ID " << attach->chid << "\n";
+
+    // Start listener thread
+    pthread_t listenerThread;
+    pthread_create(&listenerThread, nullptr, ipcListenerThread, attach);
+
+    // Main thread handles stdin input for testing
+    std::string input;
+    while (true) {
+        std::cout << "[OperatorConsole] > ";
+        std::getline(std::cin, input);
+
+        if (input == "exit") break;
+
+        if (!input.empty()) {
+            handle_received_command(input);
+        }
+    }
+
+    // Cleanup (optional)
+    name_detach(attach, 0);
     return 0;
 }
+
