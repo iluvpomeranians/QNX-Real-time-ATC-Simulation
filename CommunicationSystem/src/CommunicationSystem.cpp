@@ -103,14 +103,15 @@ int main() {
 																 MAP_SHARED,
 																 shm_fd_cmd, 0);
 
-            	 if (operator_cmd_mem == MAP_FAILED) {
-            	    perror("[CommunicationSystem] mmap failed for operator command shared memory");
+            	 if (operator_cmd_mem != MAP_FAILED) {
+            		 printf("[CommunicationSystem] Successfully connected to operator command shared memory");
                     close(shm_fd_cmd);
-                    exit(EXIT_FAILURE);
+                    break;
                 } else {
-                    perror("[Airspace] mmap failed");
+                    perror("[CommunicationSystem] mmap failed to operator command shared memory");
                     close(shm_fd_cmd);
                 }
+
             }
 
             sleep(1);
