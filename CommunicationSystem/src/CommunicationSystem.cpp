@@ -13,12 +13,15 @@
 #include "../../DataTypes/communication_system.h"
 
 OperatorCommandMemory* operator_cmd_mem = nullptr;
+CommunicationCommandMemory* comm_mem = nullptr;
 volatile sig_atomic_t signal_received = 0;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  // Condition variable for signaling
+int comm_fd;
 
 //Tutorial #3
 void signal_handler(int signo) {
     if (signo == SIGUSR1) {
-    	signal_received = 1;
+    	pthread_cond_signal(&cond);  // Signal condition variable
     }
 }
 
@@ -51,13 +54,10 @@ void* pollOperatorCommands(void* arg) {
 
     while (true) {
 
-        while (!signal_received) { // Busy-wait for the signal
-            usleep(1000);
-        }
-
-        signal_received = 0;  // Reset the flag after handling the signal
-
         pthread_mutex_lock(&cmd_mem->lock);
+    	// Wait for the signal to process commands
+    	pthread_cond_wait(&cond, &cmd_mem->lock);
+
 
         for (int i = 0; i < cmd_mem->command_count; ++i) {
             OperatorCommand& cmd = cmd_mem->commands[i];
@@ -76,14 +76,43 @@ void* pollOperatorCommands(void* arg) {
         cmd_mem->command_count = 0;
 
         pthread_mutex_unlock(&cmd_mem->lock);
-
-        sleep(1);
     }
 
     return NULL;
 }
 
+void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
+						   size_t size) {
+	if (munmap(addr, size) == 0) {
+		std::cout << "Shared memory unmapped successfully." << std::endl;
+	} else {
+		perror("munmap failed");
+	}
+
+	close(shm_fd);
+
+	if (shm_unlink(shm_name) == 0) {
+		std::cout << "Shared memory unlinked successfully." << std::endl;
+	} else {
+		perror("shm_unlink failed");
+	}
+
+}
+
+
+void handle_termination(int signum) {
+    std::cout << "[CommunicationSystem]" << signum << ", cleaning up...\n";
+    cleanup_shared_memory(COMMUNICATION_COMMAND_SHM_NAME, comm_fd, (void*) comm_mem, sizeof(CommunicationCommandMemory));
+    exit(0);
+}
+
+void setup_signal_handlers() {
+    signal(SIGINT, handle_termination);   // Ctrl+C
+    signal(SIGTERM, handle_termination);  // kill
+}
+
 int main() {
+	setup_signal_handlers();
 
 	// Register signal handler for SIGUSR1
     if (signal(SIGUSR1, signal_handler) == SIG_ERR) {
@@ -116,6 +145,35 @@ int main() {
 
             sleep(1);
         }
+    while (1) {
+        comm_fd = shm_open(COMMUNICATION_COMMAND_SHM_NAME, O_CREAT | O_RDWR, 0666);
+        if (comm_fd != -1) {
+            if (ftruncate(comm_fd, sizeof(CommunicationCommandMemory)) == -1) {
+                perror("[CommunicationSystem] ftruncate failed for communication commands");
+                exit(EXIT_FAILURE);
+            }
+
+            void* comm_addr = mmap(NULL, sizeof(CommunicationCommandMemory), PROT_READ | PROT_WRITE, MAP_SHARED, comm_fd, 0);
+            if (comm_addr != MAP_FAILED) {
+                comm_mem = static_cast<CommunicationCommandMemory*>(comm_addr);
+
+                // Initialize the mutex for shared memory
+                pthread_mutexattr_t attr;
+                pthread_mutexattr_init(&attr);
+                pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+                pthread_mutex_init(&comm_mem->lock, &attr);
+                comm_mem->command_count = 0;
+
+                std::cout << "[CommunicationSystem] Successfully created and initialized CommunicationCommand shared memory\n";
+                close(comm_fd);
+                break;
+            } else {
+                perror("[CommunicationSystem] mmap failed for communication commands");
+                close(comm_fd);
+            }
+        }
+        sleep(1);
+    }
 
 
     std::cout << "[CommunicationSystem] Connected to operator command shared memory." << std::endl;
