@@ -21,15 +21,4 @@ struct AircraftData {
     bool responded;
 };
 
-struct AircraftMsg{
-    time_t timestamp;
-    char message_content[128];
-    int id;
-	double x, y, z;
-	double speedX, speedY, speedZ;
-	bool detected;
-	bool responded;
-} ;
-
-
 #endif /* AIRCRAFT_DATA_H_ */

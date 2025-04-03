@@ -3,6 +3,7 @@
 #include <sys/dispatch.h>
 #include "aircraft_data.h"
 #include "airspace.h"
+#include "message_types.h"
 
 class Aircraft {
 
@@ -37,6 +38,9 @@ public:
 
 	static void* updatePositionThread(void* arg);
 	static void* messageHandlerThread(void* arg);
+	void handle_operator_message(OperatorMessage*);
+	void handle_radar_message(RadarMessage*);
+
 
 };
 

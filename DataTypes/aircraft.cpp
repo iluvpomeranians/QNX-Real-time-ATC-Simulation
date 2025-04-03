@@ -9,10 +9,12 @@
 #include <time.h>
 #include "aircraft.h"
 #include "operator_command.h"
+#include "message_types.h"
 
 Airspace* Aircraft::shared_memory = nullptr;
 int Aircraft::aircraft_index = 0;
 
+// TODO: Per-instance mutex for locking member values when reading/writing them
 Aircraft::Aircraft(time_t entryTime,
 				   int id,
 		           double x,
@@ -40,7 +42,7 @@ Aircraft::Aircraft(time_t entryTime,
 
 	lastupdatedTime = time(NULL);
 
-	Aircraft::shared_memory->aircraft_data[shm_index] = {entryTime, lastupdatedTime, id, x, y, z, speedX, speedY, speedZ, true, true};
+	Aircraft::shared_memory->aircraft_data[shm_index] = {entryTime, lastupdatedTime, id, x, y, z, speedX, speedY, speedZ, true, false};
 
 //	std::cout << "Aircraft Created: " << id
 //	          << " Stored at: " << &Aircraft::shared_memory->aircraft_data[shm_index]
@@ -76,7 +78,7 @@ void* Aircraft::updatePositionThread(void* arg) {
     return nullptr;
 }
 
-void* Aircraft::messageHandlerThread(void* arg){
+void* Aircraft::messageHandlerThread(void* arg) {
 	Aircraft* aircraft = static_cast<Aircraft*>(arg);
 
 	//Tutorial #4 IPC message channel creation
@@ -84,41 +86,28 @@ void* Aircraft::messageHandlerThread(void* arg){
 	snprintf(service_name, sizeof(service_name), "Aircraft%d", aircraft->id);
 	aircraft->attach = name_attach(NULL, service_name, 0);
 
-	if(aircraft->attach == NULL){
+	if (aircraft->attach == NULL) {
 		perror("name attach");
 		return nullptr;
 	}
 
 	std::cout << "[Aircraft " << aircraft->id << "] IPC channel registration: " << service_name << std::endl;
 
-	struct {
-        struct _pulse pulse;
-        OperatorCommand cmd;
-    } msg;
+	message_t msg;
 
-    while(aircraft->running){
+    while (aircraft->running) {
         int rcvid = MsgReceive(aircraft->attach->chid, &msg, sizeof(msg), NULL);
         if (rcvid == -1) {
             perror("MsgReceive");
             continue;
         }
-        if (rcvid > 0){
-            std::cout << "[Aircraft] Received command for Aircraft ID: " << msg.cmd.aircraft_id << std::endl;
-            if (msg.cmd.type == CommandType::ChangeSpeed) {
-                aircraft->speedX = msg.cmd.speed.vx;
-                aircraft->speedY = msg.cmd.speed.vy;
-                aircraft->speedZ = msg.cmd.speed.vz;
-                std::cout << "[Aircraft] Speed updated to: (" << aircraft->speedX << ", "
-                          << aircraft->speedY << ", " << aircraft->speedZ << ")" << std::endl;
-            } else if (msg.cmd.type == CommandType::ChangePosition) {
-            	//TODO: possibly revise
-            	//This instantly changes the heading
-                Aircraft::shared_memory->aircraft_data[aircraft->shm_index].x = msg.cmd.position.x;
-                Aircraft::shared_memory->aircraft_data[aircraft->shm_index].y = msg.cmd.position.y;
-                Aircraft::shared_memory->aircraft_data[aircraft->shm_index].z = msg.cmd.position.z;
-                std::cout << "[Aircraft] Position updated to: (" << msg.cmd.position.x << ", "
-                          << msg.cmd.position.y << ", " << msg.cmd.position.z << ")" << std::endl;
-            }
+        if (rcvid > 0) {
+            std::cout << "[Aircraft] Received message for Aircraft ID: " << msg.aircraft_id << std::endl;
+
+            if (msg.type == OPERATOR_TYPE) aircraft->handle_operator_message(&msg.message.operator_message);
+            if (msg.type == RADAR_TYPE)    aircraft->handle_radar_message(&msg.message.radar_message);
+
+
             //TODO: might have to send a reply -- ack message/signal
             MsgReply(rcvid, 0, NULL, 0);
         }
@@ -136,6 +125,29 @@ void Aircraft::stopThreads(){
 	running = false;
 	pthread_join(position_thread, nullptr);
 	pthread_join(ipc_thread, nullptr);
+}
+
+void Aircraft::handle_operator_message(OperatorMessage* msg) {
+	if (msg->cmd.type == CommandType::ChangeSpeed) {
+		this->speedX = msg->cmd.speed.vx;
+		this->speedY = msg->cmd.speed.vy;
+		this->speedZ = msg->cmd.speed.vz;
+		std::cout << "[Aircraft] Speed updated to: (" << this->speedX << ", "
+				  << this->speedY << ", " << this->speedZ << ")" << std::endl;
+	} else if (msg->cmd.type == CommandType::ChangePosition) {
+		//TODO: possibly revise
+		//This instantly changes the heading
+		Aircraft::shared_memory->aircraft_data[this->shm_index].x = msg->cmd.position.x;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].y = msg->cmd.position.y;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].z = msg->cmd.position.z;
+		std::cout << "[Aircraft] Position updated to: (" << msg->cmd.position.x << ", "
+				  << msg->cmd.position.y << ", " << msg->cmd.position.z << ")" << std::endl;
+	}
+}
+
+void Aircraft::handle_radar_message(RadarMessage* radar_message) {
+
+
 }
 
 Aircraft::~Aircraft(){

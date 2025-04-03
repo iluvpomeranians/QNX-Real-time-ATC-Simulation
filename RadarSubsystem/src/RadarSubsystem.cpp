@@ -8,14 +8,18 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include "RadarSubsystem.h"
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
+
+using namespace std;
 
 Airspace* airspace = nullptr;
 std::vector<Aircraft*> active_aircrafts;
 int shm_fd_airspace;
 pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t airspace_thread;
+pthread_t message_thread;
 
 
 Airspace* init_airspace_shared_memory() {
@@ -48,7 +52,6 @@ void* updateAirspaceDetectionThread(void* arg) {
 	while (true) {
 		pthread_mutex_lock(&airspace->lock);
 
-		// TODO: Changed the iterator here, validate that this works still
 		for(int i = 0; i < airspace->aircraft_count; ++i) {
 			AircraftData* aircraft = &airspace->aircraft_data[i];
 
@@ -58,12 +61,60 @@ void* updateAirspaceDetectionThread(void* arg) {
 				aircraft->detected = false;
 			} else {
 				aircraft->detected = true;
+				if (aircraft->responded == false) {
+					cout << "Aircraft " << aircraft->id << " has not been pinged, starting secondary radar...\n";
+					pthread_create(&message_thread, NULL, send_message, (void*)&aircraft->id);
+
+					// TODO: Let the thread do it's thang
+					pthread_detach(message_thread);
+
+					// For now to test
+					pthread_join(message_thread, NULL);
+					cout << "[RADAR] Thread joined\n";
+					aircraft->responded = true;
+				}
 			}
 		}
 		pthread_mutex_unlock(&airspace->lock);
 		nanosleep(&req, NULL);
 	}
 	return nullptr;
+}
+
+void* send_message(void* arg) {
+	int id = *(int*)arg;
+
+	int coid;
+	char server_name[20];
+	snprintf(server_name, sizeof(server_name), "Aircraft%d", id);
+
+	cout << "[DEBUG] server_name: " << server_name << endl;
+
+	// Wait until the server becomes available
+	while ((coid = name_open(server_name, 0)) == -1) {
+		cout << "Waiting for server " << server_name << "to start...\n";
+		sleep(0.5);
+	}
+	cout << "Connected to server '" << server_name << "'\n";
+
+	RadarMessage radar_message;
+	strcpy(radar_message.request_msg, "Plz identify yourself and send heading");
+
+	message_t msg;
+	msg.type = RADAR_TYPE;
+	msg.aircraft_id = id;
+	msg.message.radar_message = radar_message;
+
+
+	RadarReply reply;
+
+	int status = MsgSend(coid, &msg, sizeof(msg), &reply, sizeof(reply));
+    if (status == -1) {
+        perror("MsgSend");
+    }
+
+    name_close(coid);
+    return nullptr;
 }
 
 void cleanUpOnExit() {
