@@ -15,15 +15,70 @@
 OperatorCommandMemory* operator_cmd_mem = nullptr;
 CommunicationCommandMemory* comm_mem = nullptr;
 volatile sig_atomic_t signal_received = 0;
-pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  // Condition variable for signaling
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 int comm_fd;
 
 //Tutorial #3
 void signal_handler(int signo) {
     if (signo == SIGUSR1) {
-    	pthread_cond_signal(&cond);  // Signal condition variable
+    	pthread_cond_signal(&cond);
     }
 }
+
+OperatorCommandMemory* init_operator_command_memory() {
+    int shm_fd;
+    while (true) {
+        shm_fd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_RDWR, 0666);
+        if (shm_fd != -1) {
+            void* addr = mmap(NULL, sizeof(OperatorCommandMemory),
+                              PROT_READ | PROT_WRITE, MAP_SHARED,
+                              shm_fd, 0);
+            if (addr != MAP_FAILED) {
+                std::cout << "[CommunicationSystem] Connected to OperatorCommand shared memory.\n";
+                close(shm_fd);
+                return static_cast<OperatorCommandMemory*>(addr);
+            } else {
+                perror("[CommunicationSystem] mmap failed for OperatorCommand");
+                close(shm_fd);
+            }
+        }
+        sleep(1); // Retry if shm isn't ready yet
+    }
+}
+
+CommunicationCommandMemory* init_communication_command_memory() {
+    while (true) {
+        comm_fd = shm_open(COMMUNICATION_COMMAND_SHM_NAME, O_CREAT | O_RDWR, 0666);
+        if (comm_fd != -1) {
+            if (ftruncate(comm_fd, sizeof(CommunicationCommandMemory)) == -1) {
+                perror("[CommunicationSystem] ftruncate failed");
+                exit(EXIT_FAILURE);
+            }
+
+            void* addr = mmap(NULL, sizeof(CommunicationCommandMemory),
+                              PROT_READ | PROT_WRITE, MAP_SHARED,
+                              comm_fd, 0);
+            if (addr != MAP_FAILED) {
+                auto* mem = static_cast<CommunicationCommandMemory*>(addr);
+
+                pthread_mutexattr_t attr;
+                pthread_mutexattr_init(&attr);
+                pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+                pthread_mutex_init(&mem->lock, &attr);
+                mem->command_count = 0;
+
+                std::cout << "[CommunicationSystem] Created and initialized CommunicationCommand shared memory.\n";
+                close(comm_fd);
+                return mem;
+            } else {
+                perror("[CommunicationSystem] mmap failed");
+                close(comm_fd);
+            }
+        }
+        sleep(1);
+    }
+}
+
 
 // Function to send a command to a specific aircraft via IPC
 void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
@@ -112,80 +167,21 @@ void setup_signal_handlers() {
 }
 
 int main() {
-	setup_signal_handlers();
+    setup_signal_handlers();
 
-	// Register signal handler for SIGUSR1
     if (signal(SIGUSR1, signal_handler) == SIG_ERR) {
-        perror("[CommunicationSystem] Signal handler registration failed");
+        perror("[CommunicationSystem] Failed to set signal handler");
         exit(EXIT_FAILURE);
     }
 
-    // Connect to shared memory where the operator commands are stored
-    int shm_fd_cmd;
-    while (1) {
-        	shm_fd_cmd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_RDWR, 0666);
+    operator_cmd_mem = init_operator_command_memory();
+    comm_mem = init_communication_command_memory();
 
-            if (shm_fd_cmd != -1) {
-            	 operator_cmd_mem = (OperatorCommandMemory*) mmap(NULL,
-            			 	 	 	 	 	 	 	 	 	 	 sizeof(OperatorCommandMemory),
-            	                                                 PROT_READ | PROT_WRITE,
-																 MAP_SHARED,
-																 shm_fd_cmd, 0);
-
-            	 if (operator_cmd_mem != MAP_FAILED) {
-            		 printf("[CommunicationSystem] Successfully connected to operator command shared memory");
-                    close(shm_fd_cmd);
-                    break;
-                } else {
-                    perror("[CommunicationSystem] mmap failed to operator command shared memory");
-                    close(shm_fd_cmd);
-                }
-
-            }
-
-            sleep(1);
-        }
-    while (1) {
-        comm_fd = shm_open(COMMUNICATION_COMMAND_SHM_NAME, O_CREAT | O_RDWR, 0666);
-        if (comm_fd != -1) {
-            if (ftruncate(comm_fd, sizeof(CommunicationCommandMemory)) == -1) {
-                perror("[CommunicationSystem] ftruncate failed for communication commands");
-                exit(EXIT_FAILURE);
-            }
-
-            void* comm_addr = mmap(NULL, sizeof(CommunicationCommandMemory), PROT_READ | PROT_WRITE, MAP_SHARED, comm_fd, 0);
-            if (comm_addr != MAP_FAILED) {
-                comm_mem = static_cast<CommunicationCommandMemory*>(comm_addr);
-
-                // Initialize the mutex for shared memory
-                pthread_mutexattr_t attr;
-                pthread_mutexattr_init(&attr);
-                pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
-                pthread_mutex_init(&comm_mem->lock, &attr);
-                comm_mem->command_count = 0;
-
-                std::cout << "[CommunicationSystem] Successfully created and initialized CommunicationCommand shared memory\n";
-                close(comm_fd);
-                break;
-            } else {
-                perror("[CommunicationSystem] mmap failed for communication commands");
-                close(comm_fd);
-            }
-        }
-        sleep(1);
-    }
-
-
-    std::cout << "[CommunicationSystem] Connected to operator command shared memory." << std::endl;
-    close(shm_fd_cmd);
-
-    // Start the command polling thread to handle commands from the computer system
     pthread_t command_thread;
     pthread_create(&command_thread, NULL, pollOperatorCommands, operator_cmd_mem);
 
-    while (true) {
-        sleep(1);
-    }
+    while (true) sleep(1);
 
     return 0;
 }
+
