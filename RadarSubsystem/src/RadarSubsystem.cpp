@@ -66,7 +66,7 @@ void* updateAirspaceDetectionThread(void* arg) {
 					pthread_create(&message_thread, NULL, send_message, (void*)&aircraft->id);
 
 					// TODO: Let the thread do it's thang
-					pthread_detach(message_thread);
+					// pthread_detach(message_thread);
 
 					// For now to test
 					pthread_join(message_thread, NULL);

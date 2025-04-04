@@ -7,6 +7,7 @@
 #include <cstring>
 #include <ctime>
 #include <csignal>
+#include "../../DataTypes/message_types.h"
 #include "../../DataTypes/operator_command.h"
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
@@ -79,7 +80,6 @@ CommunicationCommandMemory* init_communication_command_memory() {
     }
 }
 
-
 // Function to send a command to a specific aircraft via IPC
 void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
     char service_name[20];
@@ -91,7 +91,13 @@ void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
         return;
     }
 
-    int status = MsgSend(coid, &cmd, sizeof(cmd), nullptr, 0);
+
+    message_t msg;
+
+    msg.type = OPERATOR_TYPE;
+    msg.aircraft_id   = aircraft_id;
+    msg.message.operator_command = cmd;
+    int status = MsgSend(coid, &msg, sizeof(msg), nullptr, 0);
     if (status == -1) {
         perror("[CommunicationSystem] Failed to send command to aircraft");
     } else {

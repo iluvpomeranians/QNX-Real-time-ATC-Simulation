@@ -14,10 +14,10 @@
 #define OPERATOR_TYPE 0
 #define RADAR_TYPE    1
 
-typedef struct {
-        struct _pulse pulse;
-        OperatorCommand cmd;
-} OperatorMessage;
+//typedef struct {
+//	struct _pulse pulse;
+//	OperatorCommand cmd;
+//} OperatorMessage;
 
 typedef struct {
 	char request_msg[128];
@@ -27,7 +27,7 @@ typedef struct {
 	int type;
 	int aircraft_id;
 	union {
-		OperatorMessage operator_message;
+		OperatorCommand operator_command;
 		RadarMessage radar_message;
 	} message;
 } message_t;

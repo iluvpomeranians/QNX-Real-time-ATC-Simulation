@@ -78,10 +78,8 @@ void handle_received_command(const std::string& raw_cmd) {
 void* ipcListenerThread(void* arg) {
     name_attach_t* attach = static_cast<name_attach_t*>(arg);
 
-    struct {
-        struct _pulse pulse;
-        char data[256];
-    } msg;
+
+    char msg[256];
 
     while (true) {
         int rcvid = MsgReceive(attach->chid, &msg, sizeof(msg), NULL);
@@ -92,8 +90,8 @@ void* ipcListenerThread(void* arg) {
 
         if (rcvid == 0) continue;
 
-        msg.data[255] = '\0';
-        std::string received_cmd(msg.data);
+        msg[255] = '\0';
+        std::string received_cmd(msg);
         std::cout << "\n[OperatorConsole] Received command via IPC: " << received_cmd << std::endl;
 
         handle_received_command(received_cmd);

@@ -38,7 +38,7 @@ public:
 
 	static void* updatePositionThread(void* arg);
 	static void* messageHandlerThread(void* arg);
-	void handle_operator_message(OperatorMessage*);
+	void handle_operator_message(OperatorCommand*);
 	void handle_radar_message(RadarMessage*);
 
 

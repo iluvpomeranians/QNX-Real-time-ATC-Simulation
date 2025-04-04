@@ -104,7 +104,7 @@ void* Aircraft::messageHandlerThread(void* arg) {
         if (rcvid > 0) {
             std::cout << "[Aircraft] Received message for Aircraft ID: " << msg.aircraft_id << std::endl;
 
-            if (msg.type == OPERATOR_TYPE) aircraft->handle_operator_message(&msg.message.operator_message);
+            if (msg.type == OPERATOR_TYPE) aircraft->handle_operator_message(&msg.message.operator_command);
             if (msg.type == RADAR_TYPE)    aircraft->handle_radar_message(&msg.message.radar_message);
 
 
@@ -127,21 +127,21 @@ void Aircraft::stopThreads(){
 	pthread_join(ipc_thread, nullptr);
 }
 
-void Aircraft::handle_operator_message(OperatorMessage* msg) {
-	if (msg->cmd.type == CommandType::ChangeSpeed) {
-		this->speedX = msg->cmd.speed.vx;
-		this->speedY = msg->cmd.speed.vy;
-		this->speedZ = msg->cmd.speed.vz;
+void Aircraft::handle_operator_message(OperatorCommand* cmd) {
+	if (cmd->type == CommandType::ChangeSpeed) {
+		this->speedX = cmd->speed.vx;
+		this->speedY = cmd->speed.vy;
+		this->speedZ = cmd->speed.vz;
 		std::cout << "[Aircraft] Speed updated to: (" << this->speedX << ", "
 				  << this->speedY << ", " << this->speedZ << ")" << std::endl;
-	} else if (msg->cmd.type == CommandType::ChangePosition) {
+	} else if (cmd->type == CommandType::ChangePosition) {
 		//TODO: possibly revise
 		//This instantly changes the heading
-		Aircraft::shared_memory->aircraft_data[this->shm_index].x = msg->cmd.position.x;
-		Aircraft::shared_memory->aircraft_data[this->shm_index].y = msg->cmd.position.y;
-		Aircraft::shared_memory->aircraft_data[this->shm_index].z = msg->cmd.position.z;
-		std::cout << "[Aircraft] Position updated to: (" << msg->cmd.position.x << ", "
-				  << msg->cmd.position.y << ", " << msg->cmd.position.z << ")" << std::endl;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].x = cmd->position.x;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].y = cmd->position.y;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].z = cmd->position.z;
+		std::cout << "[Aircraft] Position updated to: (" << cmd->position.x << ", "
+				  << cmd->position.y << ", " << cmd->position.z << ")" << std::endl;
 	}
 }
 
