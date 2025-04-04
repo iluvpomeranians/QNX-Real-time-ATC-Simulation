@@ -68,6 +68,7 @@ CommunicationCommandMemory* init_communication_command_memory() {
                 mem->command_count = 0;
 
                 std::cout << "[CommunicationSystem] Created and initialized CommunicationCommand shared memory.\n";
+                mem->comm_pid = getpid();//TODO: test this, print it, make sure its actually generating the PID
                 close(comm_fd);
                 return mem;
             } else {

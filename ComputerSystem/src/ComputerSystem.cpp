@@ -18,7 +18,7 @@ OperatorCommandMemory* operator_cmd_mem = nullptr;
 bool operator_cmd_initialized = false;
 
 
-int comm_system_pid = fork();  // Process ID for the CommunicationSystem
+int comm_system_pid = -1;
 int operator_cmd_fd;
 
 struct ViolationArgs {
@@ -93,6 +93,8 @@ void* pollOperatorCommands(void* arg) {
     }
 
     CommunicationCommandMemory* comm_mem = static_cast<CommunicationCommandMemory*>(addr);
+    comm_system_pid = comm_mem->comm_pid;
+    std::cout << "[ComputerSystem] Retrieved CommunicationSystem PID: " << comm_system_pid << "\n";
 
     while (true) {
         pthread_mutex_lock(&cmd_mem->lock);
@@ -106,11 +108,6 @@ void* pollOperatorCommands(void* arg) {
                       << " | Speed: (" << cmd.speed.vx << ", " << cmd.speed.vy << ", " << cmd.speed.vz << ")"
                       << std::endl;
 
-            // TODO: Dispatch send(R,m) to Comm subsystem
-            // Call function to send this command to CommunicationSystem
-            //send_command_to_aircraft(cmd.aircraft_id, cmd);
-            // send signal to communication system and then communication system will poll it from shared memory
-
             pthread_mutex_lock(&comm_mem->lock);
             comm_mem->commands[comm_mem->command_count] = cmd;
             printf("[CommunicationSystem] Command stored: Aircraft ID: %d | Type: %d | Position: (%.2f, %.2f, %.2f) | Speed: (%.2f, %.2f, %.2f)\n",
@@ -120,18 +117,19 @@ void* pollOperatorCommands(void* arg) {
                    cmd.speed.vx, cmd.speed.vy, cmd.speed.vz);
             comm_mem->command_count++;
             pthread_mutex_unlock(&comm_mem->lock);
+            //TODO: set boolean to true
         }
 
-        // Send signal to CommunicationSystem using `raise` and `comm_system_pid`
-        if (comm_system_pid != 0) {
-            std::cout << "[ComputerSystem] Sending signal to CommunicationSystem...\n";
-            std::raise(SIGUSR1);  // Send signal to CommunicationSystem
+        //TODO: add a && bolean_value to indicate that commands are available
+        if (comm_system_pid > 0) {
+            std::cout << "[ComputerSystem] Sending SIGUSR1 to PID " << comm_system_pid << "...\n";
+            kill(comm_system_pid, SIGUSR1);
+        } else {
+            std::cerr << "[ComputerSystem] comm_pid is not set yet!\n";
         }
 
-        // Clear command list after processing?
-        // We'll probably want to send to a Logger prior to deletion
+        //TODO: check size of command array and then set command count to 0
         cmd_mem->command_count = 0;
-
         pthread_mutex_unlock(&cmd_mem->lock);
 
         sleep(1);
@@ -139,6 +137,7 @@ void* pollOperatorCommands(void* arg) {
 
     return NULL;
 }
+
 
 Airspace* init_airspace_shared_memory() {
     int shm_fd;
