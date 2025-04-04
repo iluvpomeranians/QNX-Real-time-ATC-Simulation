@@ -8,18 +8,19 @@
 #ifndef COMMUNICATION_SYSTEM_H_
 #define COMMUNICATION_SYSTEM_H_
 
-#include "operator_command.h"  // For OperatorCommand
-#include "airspace.h"          // For Airspace, Aircraft
+#include <pthread.h>
+#include <sys/types.h>
+#include "operator_command.h"
 
 #define COMMUNICATION_COMMAND_SHM_NAME "communication_commands_shm"
-#define MAX_COMMANDS 100  // Example value, adjust as needed
-
+#define MAX_COMMANDS 100
 
 struct CommunicationCommandMemory {
     pthread_mutex_t lock;
     int command_count;
     OperatorCommand commands[MAX_COMMANDS];
+    pid_t comm_pid;
+    bool pid_ready;
 };
 
-
-#endif /* COMMUNICATION_SYSTEM_H_ */
+#endif
