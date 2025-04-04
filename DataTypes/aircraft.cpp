@@ -129,19 +129,37 @@ void Aircraft::stopThreads(){
 
 void Aircraft::handle_operator_message(OperatorMessage* msg) {
 	if (msg->cmd.type == CommandType::ChangeSpeed) {
-		this->speedX = msg->cmd.speed.vx;
-		this->speedY = msg->cmd.speed.vy;
-		this->speedZ = msg->cmd.speed.vz;
-		std::cout << "[Aircraft] Speed updated to: (" << this->speedX << ", "
-				  << this->speedY << ", " << this->speedZ << ")" << std::endl;
+
+		// Lock shared memory before updating position
+		pthread_mutex_lock(&shared_memory->lock);
+
+		Aircraft::shared_memory->aircraft_data[this->shm_index].speedX = msg->cmd.speed.vx;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].speedY = msg->cmd.speed.vy;
+		Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ = msg->cmd.speed.vz;
+
+		pthread_mutex_unlock(&shared_memory->lock);
 	} else if (msg->cmd.type == CommandType::ChangePosition) {
+
+		// Lock shared memory before updating position
+        pthread_mutex_lock(&shared_memory->lock);
+
 		//TODO: possibly revise
 		//This instantly changes the heading
 		Aircraft::shared_memory->aircraft_data[this->shm_index].x = msg->cmd.position.x;
 		Aircraft::shared_memory->aircraft_data[this->shm_index].y = msg->cmd.position.y;
 		Aircraft::shared_memory->aircraft_data[this->shm_index].z = msg->cmd.position.z;
+
+		pthread_mutex_unlock(&shared_memory->lock);
+
 		std::cout << "[Aircraft] Position updated to: (" << msg->cmd.position.x << ", "
 				  << msg->cmd.position.y << ", " << msg->cmd.position.z << ")" << std::endl;
+	}
+	else if (msg->cmd.type == CommandType::RequestDetails) {
+
+		std::cout << "[Aircraft] Position : (" << Aircraft::shared_memory->aircraft_data[this->shm_index].x << ", "
+				  << shared_memory->aircraft_data[this->shm_index].y << ", " << shared_memory->aircraft_data[this->shm_index].z << ")" << std::endl;
+		std::cout << "[Aircraft] Speed : (" << Aircraft::shared_memory->aircraft_data[this->shm_index].speedX << ", "
+						  << Aircraft::shared_memory->aircraft_data[this->shm_index].speedY << ", " << Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ << ")" << std::endl;
 	}
 }
 

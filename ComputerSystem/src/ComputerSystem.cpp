@@ -16,7 +16,7 @@
 Airspace* airspace;
 OperatorCommandMemory* operator_cmd_mem = nullptr;
 bool operator_cmd_initialized = false;
-
+bool commands_available = false;
 
 int comm_system_pid = -1;
 int operator_cmd_fd;
@@ -115,25 +115,30 @@ void* pollOperatorCommands(void* arg) {
                    cmd.type,
                    cmd.position.x, cmd.position.y, cmd.position.z,
                    cmd.speed.vx, cmd.speed.vy, cmd.speed.vz);
-            comm_mem->command_count++;
+            comm_mem->command_count+=1;
             pthread_mutex_unlock(&comm_mem->lock);
-            //TODO: set boolean to true
+            // Set commands_available to true after storing the command
+            commands_available = true;
         }
 
         //TODO: add a && bolean_value to indicate that commands are available
-        if (comm_system_pid > 0) {
+        if (commands_available && comm_system_pid > 0) {
             std::cout << "[ComputerSystem] Sending SIGUSR1 to PID " << comm_system_pid << "...\n";
             kill(comm_system_pid, SIGUSR1);
-        } else {
-            std::cerr << "[ComputerSystem] comm_pid is not set yet!\n";
+        } if (kill(comm_system_pid, SIGUSR1) == -1) {
+            perror("[ComputerSystem] Error sending SIGUSR1");
         }
 
         //TODO: check size of command array and then set command count to 0
-        cmd_mem->command_count = 0;
+
         pthread_mutex_unlock(&cmd_mem->lock);
 
         sleep(1);
     }
+
+    cmd_mem->command_count = 0;
+
+    commands_available = false;
 
     return NULL;
 }

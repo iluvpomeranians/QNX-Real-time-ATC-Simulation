@@ -23,4 +23,5 @@ struct CommunicationCommandMemory {
     bool pid_ready;
 };
 
+
 #endif
