@@ -38,8 +38,6 @@ typedef struct {
     int id;
 	double x, y, z;
 	double speedX, speedY, speedZ;
-	bool detected;
-	bool responded;
 } RadarReply;
 
 #endif /* MESSAGE_TYPES_H_ */

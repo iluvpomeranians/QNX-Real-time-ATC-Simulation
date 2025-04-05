@@ -14,6 +14,7 @@ private:
 public:
 	time_t entryTime, lastupdatedTime;
 	int id;
+	double x, y, z;
 	double speedX, speedY, speedZ;
 	bool running;
 	name_attach_t* attach;
@@ -38,8 +39,8 @@ public:
 
 	static void* updatePositionThread(void* arg);
 	static void* messageHandlerThread(void* arg);
-	void handle_operator_message(OperatorCommand*);
-	void handle_radar_message(RadarMessage*);
+	void handle_operator_message(int, OperatorCommand*);
+	void handle_radar_message(int, RadarMessage*);
 
 
 };

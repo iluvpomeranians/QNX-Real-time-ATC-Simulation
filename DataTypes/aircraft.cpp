@@ -26,6 +26,9 @@ Aircraft::Aircraft(time_t entryTime,
 				   Airspace* shared_mem):
 								   entryTime(entryTime),
 								   id(id),
+								   x(x),
+								   y(y),
+								   z(z),
 						   	   	   speedX(speedX),
 								   speedY(speedY),
 								   speedZ(speedZ),
@@ -50,7 +53,6 @@ Aircraft::Aircraft(time_t entryTime,
 //	          << std::endl;
 
 	aircraft_index++;
-
 }
 
 
@@ -102,17 +104,18 @@ void* Aircraft::messageHandlerThread(void* arg) {
             continue;
         }
         if (rcvid > 0) {
-            std::cout << "[Aircraft] Received message for Aircraft ID: " << msg.aircraft_id << std::endl;
+            std::cout << "[Aircraft " << aircraft->id << "] Received message for Aircraft ID: " << msg.aircraft_id << std::endl;
 
-            if (msg.type == OPERATOR_TYPE) aircraft->handle_operator_message(&msg.message.operator_command);
-            if (msg.type == RADAR_TYPE)    aircraft->handle_radar_message(&msg.message.radar_message);
-
-
-            //TODO: might have to send a reply -- ack message/signal
-            MsgReply(rcvid, 0, NULL, 0);
+            if (msg.type == OPERATOR_TYPE) {
+            	aircraft->handle_operator_message(rcvid, &msg.message.operator_command);
+            } else if (msg.type == RADAR_TYPE) {
+            	aircraft->handle_radar_message(rcvid, &msg.message.radar_message);
+            } else {
+				// Just in case
+				MsgReply(rcvid, 0, NULL, 0);
+            }
         }
     }
-
 	return nullptr;
 }
 
@@ -127,7 +130,7 @@ void Aircraft::stopThreads(){
 	pthread_join(ipc_thread, nullptr);
 }
 
-void Aircraft::handle_operator_message(OperatorCommand* cmd) {
+void Aircraft::handle_operator_message(int rcvid, OperatorCommand* cmd) {
 	// Lock shared memory before updating position
 	pthread_mutex_lock(&shared_memory->lock);
 
@@ -150,7 +153,7 @@ void Aircraft::handle_operator_message(OperatorCommand* cmd) {
 		std::cout << "[Aircraft] Position updated to: (" << cmd->position.x << ", "
 				  << cmd->position.y << ", " << cmd->position.z << ")" << std::endl;
 	}
-	else if (msg->cmd.type == CommandType::RequestDetails) {
+	else if (cmd->type == CommandType::RequestDetails) {
 
 		std::cout << "[Aircraft] Position : (" << Aircraft::shared_memory->aircraft_data[this->shm_index].x << ", "
 				  << shared_memory->aircraft_data[this->shm_index].y << ", " << shared_memory->aircraft_data[this->shm_index].z << ")" << std::endl;
@@ -158,11 +161,23 @@ void Aircraft::handle_operator_message(OperatorCommand* cmd) {
 						  << Aircraft::shared_memory->aircraft_data[this->shm_index].speedY << ", " << Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ << ")" << std::endl;
 	}
 	pthread_mutex_unlock(&shared_memory->lock);
+
+	// TODO: Implement reply
+	MsgReply(rcvid, 0, NULL, 0);
 }
 
-void Aircraft::handle_radar_message(RadarMessage* radar_message) {
+void Aircraft::handle_radar_message(int rcvid, RadarMessage* radar_message) {
 
+	std::cout << "[Aircraft " << this->id << "] Sending identification to Radar...\n";
 
+	RadarReply reply_msg = {
+			time(NULL),
+			"Here's my id and heading bro",
+			this->id,
+			this->x, this->y, this->z,
+			this->speedX, this->speedY, this->speedZ
+	};
+	MsgReply(rcvid, 0, &reply_msg, sizeof(reply_msg));
 }
 
 Aircraft::~Aircraft(){

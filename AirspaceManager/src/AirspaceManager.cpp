@@ -210,22 +210,23 @@ void start_aircrafts() {
 	}
 }
 
+void clean_up_aircrafts() {
+	for (Aircraft *a : active_aircrafts) {
+		delete a;
+	}
+	active_aircrafts.clear();
+}
+
 void handle_termination(int signum) {
-    std::cout << "[AirspaceManager]" << signum << ", cleaning up...\n";
+    std::cout << "[AirspaceManager] received signal " << signum << ", cleaning up...\n";
     cleanup_shared_memory(AIRSPACE_SHM_NAME, shm_fd, (void*) airspace, sizeof(Airspace));
+    clean_up_aircrafts();
     exit(0);
 }
 
 void setup_signal_handlers() {
     signal(SIGINT, handle_termination);   // Ctrl+C
     signal(SIGTERM, handle_termination);  // kill
-}
-
-void cleanUpOnExit() {
-	for (Aircraft *a : active_aircrafts) {
-		delete a;
-	}
-	active_aircrafts.clear();
 }
 
 int main() {
@@ -260,5 +261,6 @@ int main() {
 
 	cleanup_shared_memory(AIRSPACE_SHM_NAME, shm_fd, (void *)airspace,
 						  sizeof(Airspace));
+	clean_up_aircrafts();
 	return 0;
 }

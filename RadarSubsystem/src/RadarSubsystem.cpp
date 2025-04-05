@@ -113,6 +113,23 @@ void* send_message(void* arg) {
         perror("MsgSend");
     }
 
+    // TODO: Do something with reply
+    cout << fixed << setprecision(1);
+
+    tm* timeinfo = localtime(&reply.timestamp);
+    char timeBuffer[64];
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    string delimiter = string(50, '=');
+
+    cout << delimiter << '\n';
+    cout << left;
+    cout << setw(15) << "Timestamp:"    << timeBuffer << '\n';
+    cout << setw(15) << "Aircraft ID:"  << reply.id << '\n';
+    cout << setw(15) << "Position:"     << "(" << reply.x << ", " << reply.y << ", " << reply.z << ")" << '\n';
+    cout << setw(15) << "Velocity:"     << "(" << reply.speedX << ", " << reply.speedY << ", " << reply.speedZ << ")" << '\n';
+    cout << delimiter << '\n';
+
     name_close(coid);
     return nullptr;
 }
