@@ -65,7 +65,7 @@ void* updateAirspaceDetectionThread(void* arg) {
 					cout << "Aircraft " << aircraft->id << " has not been pinged, starting secondary radar...\n";
 					pthread_create(&message_thread, NULL, send_message, (void*)&aircraft->id);
 
-					// TODO: Let the thread do it's thang
+					// TODO: Let the thread do it's thang?
 					// pthread_detach(message_thread);
 
 					// For now to test

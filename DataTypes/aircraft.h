@@ -18,6 +18,7 @@ public:
 	double speedX, speedY, speedZ;
 	bool running;
 	name_attach_t* attach;
+	char service_name[20];
 	pthread_t position_thread, ipc_thread;
 	std::mutex lock;
 	int shm_index;
@@ -36,6 +37,7 @@ public:
 
 	void startThreads();
 	void stopThreads();
+	void send_terminator_message();
 
 	static void* updatePositionThread(void* arg);
 	static void* messageHandlerThread(void* arg);

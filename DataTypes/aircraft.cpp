@@ -34,6 +34,7 @@ Aircraft::Aircraft(time_t entryTime,
 								   speedZ(speedZ),
 								   running(true),
 								   attach(nullptr),
+								   service_name{0},
 								   position_thread(0),
 								   ipc_thread(0),
 								   shm_index(aircraft_index)
@@ -84,24 +85,23 @@ void* Aircraft::messageHandlerThread(void* arg) {
 	Aircraft* aircraft = static_cast<Aircraft*>(arg);
 
 	//Tutorial #4 IPC message channel creation
-	char service_name[20];
-	snprintf(service_name, sizeof(service_name), "Aircraft%d", aircraft->id);
-	aircraft->attach = name_attach(NULL, service_name, 0);
-
+	snprintf(aircraft->service_name, sizeof(aircraft->service_name),
+			 "Aircraft%d", aircraft->id);
+	aircraft->attach = name_attach(NULL, aircraft->service_name, 0);
 	if (aircraft->attach == NULL) {
 		perror("name attach");
 		return nullptr;
 	}
 
-	std::cout << "[Aircraft " << aircraft->id << "] IPC channel registration: " << service_name << std::endl;
+	std::cout << "[Aircraft " << aircraft->id << "] IPC channel registration: " << aircraft->service_name << std::endl;
 
 	message_t msg;
 
-    while (aircraft->running) {
+    while (true) {
         int rcvid = MsgReceive(aircraft->attach->chid, &msg, sizeof(msg), NULL);
         if (rcvid == -1) {
-            perror("MsgReceive");
-            continue;
+			perror("MsgReceive");
+			continue;
         }
         if (rcvid > 0) {
             std::cout << "[Aircraft " << aircraft->id << "] Received message for Aircraft ID: " << msg.aircraft_id << std::endl;
@@ -110,9 +110,13 @@ void* Aircraft::messageHandlerThread(void* arg) {
             	aircraft->handle_operator_message(rcvid, &msg.message.operator_command);
             } else if (msg.type == RADAR_TYPE) {
             	aircraft->handle_radar_message(rcvid, &msg.message.radar_message);
-            } else {
-				// Just in case
+            } else if (msg.type == TERMINATOR_TYPE) {
 				MsgReply(rcvid, 0, NULL, 0);
+				break;
+            } else {
+            	// Just in case
+				MsgReply(rcvid, 0, NULL, 0);
+				break;
             }
         }
     }
@@ -124,10 +128,35 @@ void Aircraft::startThreads(){
 	pthread_create(&ipc_thread, nullptr, messageHandlerThread, this);
 }
 
-void Aircraft::stopThreads(){
+// TODO: Delete prints
+void Aircraft::stopThreads() {
 	running = false;
 	pthread_join(position_thread, nullptr);
+	std::cout << "[DEBUG] position_thread joined\n";
+
+	// ipc_thread can stay blocked on MsgReceive() under certain conditions.
+	// Changed to infinite while loop that will wait for terminator message.
+	send_terminator_message();
 	pthread_join(ipc_thread, nullptr);
+	std::cout << "[DEBUG] ipc_thread joined\n";
+}
+
+void Aircraft::send_terminator_message() {
+	int coid = name_open(this->service_name, 0);
+	if (coid == -1) {
+		perror("name_open");
+	}
+
+	TerminatorMessage terminator_msg;
+	message_t msg;
+	msg.type                       = TERMINATOR_TYPE;
+	msg.aircraft_id                = this->id;
+	msg.message.terminator_message = terminator_msg;
+
+	int status = MsgSend(coid, &msg, sizeof(msg), &terminator_msg, sizeof(terminator_msg));
+	if (status == -1) {
+		perror("MsgSend");
+	}
 }
 
 void Aircraft::handle_operator_message(int rcvid, OperatorCommand* cmd) {

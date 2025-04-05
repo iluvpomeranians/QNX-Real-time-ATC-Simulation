@@ -11,8 +11,10 @@
 #include "aircraft_data.h"
 #include "operator_command.h"
 
-#define OPERATOR_TYPE 0
-#define RADAR_TYPE    1
+#define OPERATOR_TYPE   0
+#define RADAR_TYPE      1
+#define TERMINATOR_TYPE 2
+
 
 //typedef struct {
 //	struct _pulse pulse;
@@ -23,12 +25,15 @@ typedef struct {
 	char request_msg[128];
 } RadarMessage;
 
+typedef struct {} TerminatorMessage;
+
 typedef struct {
 	int type;
 	int aircraft_id;
 	union {
 		OperatorCommand operator_command;
 		RadarMessage radar_message;
+		TerminatorMessage terminator_message;
 	} message;
 } message_t;
 
