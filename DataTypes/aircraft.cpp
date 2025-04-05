@@ -128,10 +128,17 @@ void Aircraft::stopThreads(){
 }
 
 void Aircraft::handle_operator_message(OperatorCommand* cmd) {
+	// Lock shared memory before updating position
+	pthread_mutex_lock(&shared_memory->lock);
+
 	if (cmd->type == CommandType::ChangeSpeed) {
 		this->speedX = cmd->speed.vx;
 		this->speedY = cmd->speed.vy;
 		this->speedZ = cmd->speed.vz;
+
+		// Aircraft::shared_memory->aircraft_data[this->shm_index].speedX = msg->cmd.speed.vx;
+		// Aircraft::shared_memory->aircraft_data[this->shm_index].speedY = msg->cmd.speed.vy;
+		// Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ = msg->cmd.speed.vz;
 		std::cout << "[Aircraft] Speed updated to: (" << this->speedX << ", "
 				  << this->speedY << ", " << this->speedZ << ")" << std::endl;
 	} else if (cmd->type == CommandType::ChangePosition) {
@@ -143,6 +150,14 @@ void Aircraft::handle_operator_message(OperatorCommand* cmd) {
 		std::cout << "[Aircraft] Position updated to: (" << cmd->position.x << ", "
 				  << cmd->position.y << ", " << cmd->position.z << ")" << std::endl;
 	}
+	else if (msg->cmd.type == CommandType::RequestDetails) {
+
+		std::cout << "[Aircraft] Position : (" << Aircraft::shared_memory->aircraft_data[this->shm_index].x << ", "
+				  << shared_memory->aircraft_data[this->shm_index].y << ", " << shared_memory->aircraft_data[this->shm_index].z << ")" << std::endl;
+		std::cout << "[Aircraft] Speed : (" << Aircraft::shared_memory->aircraft_data[this->shm_index].speedX << ", "
+						  << Aircraft::shared_memory->aircraft_data[this->shm_index].speedY << ", " << Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ << ")" << std::endl;
+	}
+	pthread_mutex_unlock(&shared_memory->lock);
 }
 
 void Aircraft::handle_radar_message(RadarMessage* radar_message) {

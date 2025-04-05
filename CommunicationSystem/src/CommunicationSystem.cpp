@@ -92,12 +92,11 @@ void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
         return;
     }
 
-
     message_t msg;
-
+    msg.aircraft_id = aircraft_id;
     msg.type = OPERATOR_TYPE;
-    msg.aircraft_id   = aircraft_id;
-    msg.message.operator_command = cmd;
+    msg.message.operator_message.cmd = cmd;
+
     int status = MsgSend(coid, &msg, sizeof(msg), nullptr, 0);
     if (status == -1) {
         perror("[CommunicationSystem] Failed to send command to aircraft");
@@ -120,9 +119,9 @@ void* pollOperatorCommands(void* arg) {
     	// Wait for the signal to process commands
     	pthread_cond_wait(&cond, &cmd_mem->lock);
 
-
         for (int i = 0; i < cmd_mem->command_count; ++i) {
             OperatorCommand& cmd = cmd_mem->commands[i];
+            std::cout << "[CommunicationSystem] Command sent to Aircraft ID " << cmd.aircraft_id << std::endl;
 
             std::cout << "[Received Command] Aircraft ID: " << cmd.aircraft_id
                       << " | Type: " << cmd.type
