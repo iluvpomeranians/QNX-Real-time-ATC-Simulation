@@ -6,15 +6,19 @@
 #include <fstream>
 #include <unistd.h>
 #include <stdbool.h>
+#include <csignal>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
 
 #define FUTURE_OFFSET_SEC 120
-
 Airspace* airspace;
-pthread_mutex_t shm_mutex = PTHREAD_MUTEX_INITIALIZER;
-OperatorCommandMemory* operator_commands = nullptr;
+OperatorCommandMemory* operator_cmd_mem = nullptr;
+bool operator_cmd_initialized = false;
+bool commands_available = false;
+
+int comm_system_pid = -1;
+int operator_cmd_fd;
 
 struct ViolationArgs {
     Airspace* shm_ptr;
@@ -24,18 +28,18 @@ struct ViolationArgs {
 
 OperatorCommandMemory* init_operator_command_memory() {
 
-    int cmd_fd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_CREAT | O_RDWR, 0666);
-    if (cmd_fd == -1) {
+    operator_cmd_fd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_CREAT | O_RDWR, 0666);
+    if (operator_cmd_fd == -1) {
         perror("shm_open failed for operator commands");
         exit(EXIT_FAILURE);
     }
 
-    if (ftruncate(cmd_fd, sizeof(OperatorCommandMemory)) == -1) {
+    if (ftruncate(operator_cmd_fd, sizeof(OperatorCommandMemory)) == -1) {
         perror("ftruncate failed for operator commands");
         exit(EXIT_FAILURE);
     }
 
-    void* addr = mmap(NULL, sizeof(OperatorCommandMemory), PROT_READ | PROT_WRITE, MAP_SHARED, cmd_fd, 0);
+    void* addr = mmap(NULL, sizeof(OperatorCommandMemory), PROT_READ | PROT_WRITE, MAP_SHARED, operator_cmd_fd, 0);
     if (addr == MAP_FAILED) {
         perror("mmap failed for operator commands");
         exit(EXIT_FAILURE);
@@ -49,6 +53,8 @@ OperatorCommandMemory* init_operator_command_memory() {
     pthread_mutex_init(&cmd_mem->lock, &attr);
     cmd_mem->command_count = 0;
 
+    operator_cmd_initialized = true;
+
     std::cout << "[ComputerSystem] Initialized OperatorCommand shared memory\n";
     return cmd_mem;
 }
@@ -57,6 +63,31 @@ void* pollOperatorCommands(void* arg) {
     OperatorCommandMemory* cmd_mem = (OperatorCommandMemory*) arg;
 
     std::cout << "[ComputerSystem] Polling Operator Commands...\n";
+
+    int comm_fd;
+    void* addr = MAP_FAILED;
+
+    std::cout << "[ComputerSystem] Waiting for CommunicationCommand shared memory to become available...\n";
+
+    while (1) {
+        comm_fd = shm_open(COMMUNICATION_COMMAND_SHM_NAME, O_RDWR, 0666);
+        if (comm_fd != -1) {
+            addr = mmap(NULL, sizeof(CommunicationCommandMemory), PROT_READ | PROT_WRITE, MAP_SHARED, comm_fd, 0);
+            if (addr != MAP_FAILED) {
+                std::cout << "[ComputerSystem] Successfully connected to CommunicationCommand shared memory\n";
+                close(comm_fd);
+                break;
+            } else {
+                perror("[ComputerSystem] mmap failed for CommunicationCommand shared memory");
+                close(comm_fd);
+            }
+        }
+        sleep(1);
+    }
+
+    CommunicationCommandMemory* comm_mem = static_cast<CommunicationCommandMemory*>(addr);
+    comm_system_pid = comm_mem->comm_pid;
+    std::cout << "[ComputerSystem] Retrieved CommunicationSystem PID: " << comm_system_pid << "\n";
 
     while (true) {
         pthread_mutex_lock(&cmd_mem->lock);
@@ -70,20 +101,44 @@ void* pollOperatorCommands(void* arg) {
                       << " | Speed: (" << cmd.speed.vx << ", " << cmd.speed.vy << ", " << cmd.speed.vz << ")"
                       << std::endl;
 
-            // TODO: Dispatch send(R,m) to Comm subsystem
+            pthread_mutex_lock(&comm_mem->lock);
+            comm_mem->commands[comm_mem->command_count] = cmd;
+            printf("[CommunicationSystem] Command stored: Aircraft ID: %d | Type: %d | Position: (%.2f, %.2f, %.2f) | Speed: (%.2f, %.2f, %.2f)\n",
+                   cmd.aircraft_id,
+                   cmd.type,
+                   cmd.position.x, cmd.position.y, cmd.position.z,
+                   cmd.speed.vx, cmd.speed.vy, cmd.speed.vz);
+            
+            // TODO: Clear command list after processing?
+            // We'll probably want to send to a Logger prior to deletion
+            comm_mem->command_count+=1;
+            pthread_mutex_unlock(&comm_mem->lock);
+            // Set commands_available to true after storing the command
+            commands_available = true;
         }
 
-        // Clear command list after processing?
-        // We'll probably want to send to a Logger prior to deletion
-        cmd_mem->command_count = 0;
+        //TODO: add a && bolean_value to indicate that commands are available
+        if (commands_available && comm_system_pid > 0) {
+            std::cout << "[ComputerSystem] Sending SIGUSR1 to PID " << comm_system_pid << "...\n";
+            kill(comm_system_pid, SIGUSR1);
+        } if (kill(comm_system_pid, SIGUSR1) == -1) {
+            perror("[ComputerSystem] Error sending SIGUSR1");
+        }
+
+        //TODO: check size of command array and then set command count to 0
 
         pthread_mutex_unlock(&cmd_mem->lock);
 
         sleep(1);
     }
 
+    cmd_mem->command_count = 0;
+
+    commands_available = false;
+
     return NULL;
 }
+
 
 Airspace* init_airspace_shared_memory() {
     int shm_fd;
@@ -247,10 +302,42 @@ void* violationCheck(void* arg) {
     return NULL;
 }
 
+void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
+						   size_t size) {
+	if (munmap(addr, size) == 0) {
+		std::cout << "Shared memory unmapped successfully." << std::endl;
+	} else {
+		perror("munmap failed");
+	}
+
+	close(shm_fd);
+
+	if (operator_cmd_initialized == true){
+		if (shm_unlink(shm_name) == 0) {
+				std::cout << "Shared memory unlinked successfully." << std::endl;
+		} else {
+			perror("shm_unlink failed");
+		}
+	}
+
+}
+
+void handle_termination(int signum) {
+    std::cout << "[ComputerSystem]" << " cleaning up operator shared memory...\n";
+    cleanup_shared_memory(OPERATOR_COMMAND_SHM_NAME, operator_cmd_fd, (void*) operator_cmd_mem, sizeof(OperatorCommandMemory));
+    exit(0);
+}
+
+void setup_signal_handlers() {
+    signal(SIGINT, handle_termination);   // Ctrl+C
+    signal(SIGTERM, handle_termination);  // kill
+}
 
 int main() {
+
+	setup_signal_handlers();
     airspace = init_airspace_shared_memory();
-    OperatorCommandMemory* operator_cmd_mem = init_operator_command_memory();
+    operator_cmd_mem = init_operator_command_memory();
 
     pthread_t monitorThread;
     pthread_create(&monitorThread, NULL, violationCheck, NULL);

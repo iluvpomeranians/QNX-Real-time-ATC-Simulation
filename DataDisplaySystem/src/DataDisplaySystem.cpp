@@ -87,18 +87,17 @@ void drawAirspace() {
         if (y < 1) y = 2;
 
         if (x >= 0 && x < DISPLAY_WIDTH && y >= 1 && y < DISPLAY_HEIGHT) {
-            activeAircrafts.push_back(aircraft);  // ✅ Only push if valid for display
+            activeAircrafts.push_back(aircraft);
 
             // Assign BLIP symbol if new
             if (blipMap.find(aircraft.id) == blipMap.end()) {
                 blipMap[aircraft.id] = 'a' + i;
             }
 
-            // Draw onto screen grid
             if (screen[y][x] == '.') {
                 screen[y][x] = blipMap[aircraft.id];
             } else {
-                screen[y][x] = '+'; // Collision indicator
+                screen[y][x] = '+';
             }
         }
     }
@@ -171,11 +170,13 @@ void drawAirspace() {
   }
 
 void setupOperatorConsoleConnection() {
-	operator_coid = name_open(OPERATOR_CONSOLE_CHANNEL_NAME, 0);
-	if (operator_coid == -1) {
-	    perror("name_open failed");
-	    exit(1);
+	while ((operator_coid = name_open(OPERATOR_CONSOLE_CHANNEL_NAME, 0)) == -1) {
+		std::cout << "Waiting for server " << OPERATOR_CONSOLE_CHANNEL_NAME << "to start...\n";
+
+		// TODO: (Optional) Use better timer
+		sleep(0.5);
 	}
+	std::cout << "Connected to server '" << OPERATOR_CONSOLE_CHANNEL_NAME << "'\n";
 
     std::cout << "[DataDisplay] Connected to OperatorConsole channel.\n";
 }
