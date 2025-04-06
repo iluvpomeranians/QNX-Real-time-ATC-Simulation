@@ -95,7 +95,7 @@ void send_command_to_aircraft(int aircraft_id, const OperatorCommand& cmd) {
     message_t msg;
     msg.aircraft_id = aircraft_id;
     msg.type = OPERATOR_TYPE;
-    msg.message.operator_message.cmd = cmd;
+    msg.message.operator_command = cmd;
 
     int status = MsgSend(coid, &msg, sizeof(msg), nullptr, 0);
     if (status == -1) {

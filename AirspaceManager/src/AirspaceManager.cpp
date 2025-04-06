@@ -221,7 +221,7 @@ void handle_termination(int signum) {
     std::cout << "[AirspaceManager] received signal " << signum << ", cleaning up...\n";
     clean_up_aircrafts();
     cleanup_shared_memory(AIRSPACE_SHM_NAME, shm_fd, (void*) airspace, sizeof(Airspace));
-
+    std::cout << "Exiting...\n";
     exit(0);
 }
 

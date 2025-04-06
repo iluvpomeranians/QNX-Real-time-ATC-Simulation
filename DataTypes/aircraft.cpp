@@ -168,9 +168,9 @@ void Aircraft::handle_operator_message(int rcvid, OperatorCommand* cmd) {
 		this->speedY = cmd->speed.vy;
 		this->speedZ = cmd->speed.vz;
 
-		// Aircraft::shared_memory->aircraft_data[this->shm_index].speedX = msg->cmd.speed.vx;
-		// Aircraft::shared_memory->aircraft_data[this->shm_index].speedY = msg->cmd.speed.vy;
-		// Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ = msg->cmd.speed.vz;
+        Aircraft::shared_memory->aircraft_data[this->shm_index].speedX = cmd->speed.vx;
+        Aircraft::shared_memory->aircraft_data[this->shm_index].speedY = cmd->speed.vy;
+        Aircraft::shared_memory->aircraft_data[this->shm_index].speedZ = cmd->speed.vz;
 		std::cout << "[Aircraft] Speed updated to: (" << this->speedX << ", "
 				  << this->speedY << ", " << this->speedZ << ")" << std::endl;
 	} else if (cmd->type == CommandType::ChangePosition) {
