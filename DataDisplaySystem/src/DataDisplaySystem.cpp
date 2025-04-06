@@ -170,9 +170,8 @@ void drawAirspace() {
   }
 
 void setupOperatorConsoleConnection() {
+	std::cout << "Waiting for server " << OPERATOR_CONSOLE_CHANNEL_NAME << " to start...\n";
 	while ((operator_coid = name_open(OPERATOR_CONSOLE_CHANNEL_NAME, 0)) == -1) {
-		std::cout << "Waiting for server " << OPERATOR_CONSOLE_CHANNEL_NAME << "to start...\n";
-
 		// TODO: (Optional) Use better timer
 		sleep(0.5);
 	}

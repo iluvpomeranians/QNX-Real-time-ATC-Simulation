@@ -45,7 +45,7 @@ OperatorCommandMemory* init_operator_command_memory() {
                 close(shm_fd);
             }
         }
-        sleep(1); // Retry if shm isn't ready yet
+        sleep(1);
     }
 }
 
@@ -71,7 +71,7 @@ CommunicationCommandMemory* init_communication_command_memory() {
                 mem->command_count = 0;
 
                 std::cout << "[CommunicationSystem] Created and initialized CommunicationCommand shared memory.\n";
-                mem->comm_pid = getpid();//TODO: test this, print it, make sure its actually generating the PID
+                mem->comm_pid = getpid();
                 close(comm_fd);
                 return mem;
             } else {
@@ -134,8 +134,6 @@ void* pollOperatorCommands(void* arg) {
             send_command_to_aircraft(cmd.aircraft_id, cmd);
         }
 
-        //TODO: We should run a size-check on commands[] arr to make sure it aligns
-        //with command count
         cmd_mem->command_count = 0;
 
         pthread_mutex_unlock(&cmd_mem->lock);
@@ -144,8 +142,7 @@ void* pollOperatorCommands(void* arg) {
     return NULL;
 }
 
-void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
-						   size_t size) {
+void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr, size_t size) {
 	if (munmap(addr, size) == 0) {
 		std::cout << "Shared memory unmapped successfully." << std::endl;
 	} else {

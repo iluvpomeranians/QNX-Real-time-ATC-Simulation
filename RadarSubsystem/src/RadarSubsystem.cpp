@@ -142,8 +142,7 @@ int main() {
 
     airspace = init_airspace_shared_memory();
 
-    std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << airspace
-              << std::endl;
+    std::cout << "[DEBUG] Shared Memory Base Address for Aircrafts: " << airspace << std::endl;
 
 	pthread_create(&airspace_thread, nullptr, updateAirspaceDetectionThread, NULL);
 

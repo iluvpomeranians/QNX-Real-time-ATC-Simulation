@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <csignal>
+#include <sys/dispatch.h>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
@@ -26,6 +27,7 @@ struct ViolationArgs {
     int total_aircraft;
     double elapsedTime;
 };
+
 
 OperatorCommandMemory* init_operator_command_memory() {
 
@@ -114,28 +116,27 @@ void* pollOperatorCommands(void* arg) {
             // We'll probably want to send to a Logger prior to deletion
             comm_mem->command_count+=1;
             pthread_mutex_unlock(&comm_mem->lock);
+
             // Set commands_available to true after storing the command
             commands_available = true;
         }
 
-        //TODO: add a && bolean_value to indicate that commands are available
         if (commands_available && comm_system_pid > 0) {
             std::cout << "[ComputerSystem] Sending SIGUSR1 to PID " << comm_system_pid << "...\n";
-            kill(comm_system_pid, SIGUSR1);
-        } if (kill(comm_system_pid, SIGUSR1) == -1) {
-            perror("[ComputerSystem] Error sending SIGUSR1");
-        }
+            if (kill(comm_system_pid, SIGUSR1) == -1) {
+                 perror("[ComputerSystem] Error sending SIGUSR1");
+            }
 
-        //TODO: check size of command array and then set command count to 0
+            cmd_mem->command_count = 0;
+            commands_available = false;
+        }
 
         pthread_mutex_unlock(&cmd_mem->lock);
 
         sleep(1);
     }
 
-    cmd_mem->command_count = 0;
 
-    commands_available = false;
 
     return NULL;
 }
@@ -169,11 +170,27 @@ Airspace* init_airspace_shared_memory() {
 
 
 void sendAlert(int aircraft1, int aircraft2) {
-//	std::cout << "[ALERT]: Aircraft " << aircraft1
-//	              << " and Aircraft " << aircraft2 << " are too close"
-//	              << std::endl;
-    // TODO: Implement alert mechanism (e.g., notify operator)
+    char message[100];
+    snprintf(message, sizeof(message),
+             "ALERT: Aircraft %d and Aircraft %d are too close!", aircraft1, aircraft2);
+
+    int coid = name_open(OPERATOR_VIOLATIONS_CHANNEL_NAME, 0);
+    if (coid == -1) {
+        perror("[ComputerSystem] Failed to connect to OperatorConsole IPC channel");
+        return;
+    }
+
+    int status = MsgSend(coid, message, sizeof(message), NULL, 0);
+    if (status == -1) {
+        perror("[ComputerSystem] Failed to send alert to OperatorConsole");
+    } else {
+    	//TURN ON ALERTS
+        //std::cout << "[ComputerSystem] Alert sent to OperatorConsole: " << message << std::endl;
+    }
+
+    name_close(coid);
 }
+
 
 void sendIdToDisplay(int aircraft_id) {
     std::cout << "DEBUG SEND ID: " << aircraft_id << std::endl;
