@@ -10,6 +10,7 @@
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
+#include "../../DataTypes/communication_system.h"
 
 #define FUTURE_OFFSET_SEC 120
 Airspace* airspace;
