@@ -125,13 +125,12 @@ void* pollOperatorCommands(void* arg) {
 
         if (commands_available && comm_system_pid > 0) {
             std::cout << "[ComputerSystem] Sending SIGUSR1 to PID " << comm_system_pid << "...\n";
-            if (kill(comm_system_pid, SIGUSR1) == -1) {
-                 perror("[ComputerSystem] Error sending SIGUSR1");
-            }
 
-            cmd_mem->command_count = 0;
-            commands_available = false;
         }
+
+        if (kill(comm_system_pid, SIGUSR1) == -1) {
+			 perror("[ComputerSystem] Error sending SIGUSR1");
+		}
 
         pthread_mutex_unlock(&cmd_mem->lock);
 
@@ -139,6 +138,8 @@ void* pollOperatorCommands(void* arg) {
 
     }
 
+    cmd_mem->command_count = 0;
+    commands_available = false;
 
 
     return NULL;
