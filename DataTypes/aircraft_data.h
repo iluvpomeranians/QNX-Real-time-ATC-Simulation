@@ -10,7 +10,7 @@
 
 #include <time.h>
 
-#define MAX_AIRCRAFT 100
+#define MAX_AIRCRAFT 200
 
 struct AircraftData {
 	time_t entryTime, lastupdatedTime;
