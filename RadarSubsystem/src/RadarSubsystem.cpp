@@ -11,8 +11,11 @@
 #include "RadarSubsystem.h"
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/aircraft.h"
+#include "../../DataTypes/timing_logger.h"
 
 using namespace std;
+
+TimingLogger logger("radar.txt");
 
 Airspace* airspace = nullptr;
 std::vector<Aircraft*> active_aircrafts;
@@ -91,6 +94,7 @@ void* updateAirspaceDetectionThread(void* arg) {
     time_t last_log_time = time(NULL);
 
 	while (true) {
+		timespec start = logger.now();
 		pthread_mutex_lock(&airspace->lock);
 
 		for(int i = 0; i < airspace->aircraft_count; ++i) {
@@ -106,10 +110,6 @@ void* updateAirspaceDetectionThread(void* arg) {
 					cout << "Aircraft " << aircraft->id << " has not been pinged, starting secondary radar...\n";
 					pthread_create(&message_thread, NULL, send_message, (void*)&aircraft->id);
 
-					// TODO: Let the thread do it's thang?
-					// pthread_detach(message_thread);
-
-					// For now to test
 					pthread_join(message_thread, NULL);
 					cout << "[RADAR] Thread joined\n";
 					aircraft->responded = true;
@@ -123,6 +123,8 @@ void* updateAirspaceDetectionThread(void* arg) {
 			last_log_time = now;
 		}
 		pthread_mutex_unlock(&airspace->lock);
+		timespec end = logger.now();
+		logger.logDuration("updateAirspaceDetectionThread", start, end);
 		nanosleep(&req, NULL);
 	}
 	return nullptr;

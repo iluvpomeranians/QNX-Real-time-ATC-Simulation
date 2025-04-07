@@ -14,6 +14,7 @@
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
+#include "../../DataTypes/timing_logger.h"
 
 #define AIRSPACE_WIDTH 100000
 #define AIRSPACE_HEIGHT 100000
@@ -23,6 +24,7 @@
 Airspace* airspace = nullptr;
 std::map<int, char> blipMap;
 int operator_coid = -1;
+TimingLogger logger("draw_display.txt");
 
 void clearScreen() {
     for (int i = 0; i < 24; ++i)
@@ -224,8 +226,11 @@ int main() {
     while (true) {
         std::time_t now = std::time(nullptr);
         if (now - lastUpdate >= 1) {
-        	clearScreen();
+            clearScreen();
+            timespec start = logger.now();
             drawAirspace();
+            timespec end = logger.now();
+    		logger.logDuration("drawAirspace", start, end);
             lastUpdate = now;
         }
         nanosleep(&delay, NULL);

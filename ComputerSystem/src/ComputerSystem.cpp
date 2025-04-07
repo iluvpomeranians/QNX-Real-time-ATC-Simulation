@@ -12,12 +12,14 @@
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
 #include "../../DataTypes/communication_system.h"
+#include "../../DataTypes/timing_logger.h"
 
 #define FUTURE_OFFSET_SEC 120
 Airspace* airspace;
 OperatorCommandMemory* operator_cmd_mem = nullptr;
 bool operator_cmd_initialized = false;
 bool commands_available = false;
+TimingLogger logger("violation_check.txt");
 
 int comm_system_pid = -1;
 int operator_cmd_fd;
@@ -201,6 +203,7 @@ void getProjectedPosition(AircraftData& aircraft, double time) {
 }
 
 void* checkCurrentViolations(void* args) {
+	timespec start = logger.now();
     struct ViolationArgs* data = (struct ViolationArgs*) args;
     Airspace* l_airspace = data->shm_ptr;
 
@@ -235,11 +238,15 @@ void* checkCurrentViolations(void* args) {
     }
 
     pthread_mutex_unlock(&airspace->lock);
+    timespec end = logger.now();
+    logger.logDuration("checkCurrentViolations", start, end);
+
     return NULL;
 }
 
 
 void* checkFutureViolations(void* args) {
+	timespec start = logger.now();
     struct ViolationArgs* data = (struct ViolationArgs*) args;
     Airspace* l_airspace = data->shm_ptr;
     int max = data->total_aircraft;
@@ -284,17 +291,20 @@ void* checkFutureViolations(void* args) {
     }
 
     pthread_mutex_unlock(&airspace->lock);
+    //usleep(5000); -- debug to see if timing is accounted for in logger
+    timespec end = logger.now();
+    logger.logDuration("checkFuturetViolations", start, end);
     return NULL;
 }
 
 
 void* violationCheck(void* arg) {
+
     struct timespec ts = {5, 0};
 
     std::cout << "[ComputerSystem] Checking Violations...\n";
 
     while (1) {
-
         struct ViolationArgs args = {
             .shm_ptr = airspace,
             .total_aircraft = MAX_AIRCRAFT,
@@ -307,6 +317,7 @@ void* violationCheck(void* arg) {
 
         pthread_join(currentThread, NULL);
         pthread_join(futureThread, NULL);
+
 
         nanosleep(&ts, NULL);
     }
