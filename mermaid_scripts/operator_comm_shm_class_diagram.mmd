@@ -1,0 +1,49 @@
+---
+config:
+  layout: dagre
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+direction TB
+    class CommandType {
+	    +ChangePosition
+	    +ChangeSpeed
+	    +RequestDetails
+    }
+    class Position {
+	    +double x
+	    +double y
+	    +double z
+    }
+    class Speed {
+	    +double vx
+	    +double vy
+	    +double vz
+    }
+    class OperatorCommand {
+	    +CommandType type
+	    +int aircraft_id
+	    +Position position
+	    +Speed speed
+	    +time_t timestamp
+    }
+    class OperatorCommandMemory {
+	    +pthread_mutex_t lock
+	    +int command_count
+	    +bool updated
+	    +OperatorCommand commands[MAX_OPERATOR_COMMANDS]
+    }
+    class CommunicationCommandMemory {
+	    +pthread_mutex_t lock
+	    +int command_count
+	    +OperatorCommand commands[MAX_COMMANDS]
+	    +pid_t comm_pid
+	    +bool pid_ready
+    }
+	<<enum>> CommandType
+    OperatorCommand --> Position
+    OperatorCommand --> Speed
+    OperatorCommand --> CommandType
+    OperatorCommandMemory "1" o-- "MAX_OPERATOR_COMMANDS" OperatorCommand
+    CommunicationCommandMemory "1" o-- "MAX_COMMANDS" OperatorCommand

@@ -1,0 +1,66 @@
+classDiagram
+direction TB
+
+class CommandType {
+    <<enum>>
+    +ChangePosition
+    +ChangeSpeed
+    +RequestDetails
+}
+
+class Position {
+    +double x
+    +double y
+    +double z
+}
+
+class Speed {
+    +double vx
+    +double vy
+    +double vz
+}
+
+class OperatorCommand {
+    +CommandType type
+    +int aircraft_id
+    +Position position
+    +Speed speed
+    +time_t timestamp
+}
+
+class RadarMessage {
+    +char request_msg[128]
+}
+
+class TerminatorMessage {
+    <<empty>>
+    // Empty struct
+}
+
+class message_t {
+    +int type
+    +int aircraft_id
+    +OperatorCommand operator_command  // union
+    +RadarMessage radar_message        // union
+    +TerminatorMessage terminator_message  // union
+}
+
+class RadarReply {
+    +time_t timestamp
+    +char message_content[128]
+    +int id
+    +double x
+    +double y
+    +double z
+    +double speedX
+    +double speedY
+    +double speedZ
+}
+
+%% Relationships
+OperatorCommand --> Position
+OperatorCommand --> Speed
+OperatorCommand --> CommandType
+message_t --> OperatorCommand
+message_t --> RadarMessage
+message_t --> TerminatorMessage

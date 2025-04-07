@@ -2,26 +2,26 @@ sequenceDiagram
     participant AircraftMain as Aircraft::startThreads()
     participant PositionThread as updatePositionThread
     participant IPCThread as messageHandlerThread
-    participant SharedMemory
-    participant Operator
+    participant AirspaceSharedMemory
+    participant Communication
     participant Radar
 
     AircraftMain ->> PositionThread: pthread_create(updatePositionThread)
     AircraftMain ->> IPCThread: pthread_create(messageHandlerThread)
 
     loop Every 1 second
-        PositionThread ->> SharedMemory: lock()
-        PositionThread ->> SharedMemory: update x/y/z\n+ lastupdatedTime
-        PositionThread ->> SharedMemory: unlock()
+        PositionThread ->> AirspaceSharedMemory: lock()
+        PositionThread ->> AirspaceSharedMemory: update x/y/z<br>+ lastupdatedTime
+        PositionThread ->> AirspaceSharedMemory: unlock()
     end
 
     Note over IPCThread: Waiting on MsgReceive()
 
-    Operator ->> IPCThread: MsgSend (OperatorCommand)
-    IPCThread ->> SharedMemory: lock()
-    IPCThread ->> SharedMemory: update speed or position
-    IPCThread ->> SharedMemory: unlock()
-    IPCThread ->> Operator: MsgReply
+    Communication ->> IPCThread: MsgSend (CommunicationCommand)
+    IPCThread ->> AirspaceSharedMemory: lock()
+    IPCThread ->> AirspaceSharedMemory: update speed or position
+    IPCThread ->> AirspaceSharedMemory: unlock()
+    IPCThread ->> Communication: MsgReply
 
     Radar ->> IPCThread: MsgSend (RadarMessage)
     IPCThread ->> Radar: MsgReply (RadarReply)

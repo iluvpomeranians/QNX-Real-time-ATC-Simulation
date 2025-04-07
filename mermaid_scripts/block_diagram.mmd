@@ -1,0 +1,41 @@
+flowchart TD
+    %% Shared Memory Blocks with internal mutex and bucket
+    subgraph AirspaceSHM
+        direction TB
+        airspaceMutex[mutex lock]
+        shm1[(Shared Memory)]
+    end
+
+    subgraph OperatorCommandSHM
+        direction TB
+        operatorMutex[mutex lock]
+        shm2[(Shared Memory)]
+    end
+
+    subgraph CommunicationSHM
+        direction TB
+        commMutex[mutex lock]
+        shm3[(Shared Memory)]
+    end
+
+    %% Systems / Modules
+    Aircraft[Aircraft]
+    Radar[Radar System]
+    Display[Data Display System]
+    Computer[Computer System]
+    CommSys[Communication System]
+    OperatorConsole[Operator Console System]
+
+    %% Arrows for Airspace shm
+    Aircraft -->|update position| shm1
+    Radar -->|read| shm1
+    Computer -->|read| shm1
+    Display -->|read| shm1
+
+    %% Arrows for Operator shm
+    OperatorConsole -->|write| shm2
+    Computer -->|read| shm2
+
+    %% Arrows for Communication shm
+    Computer -->|write| shm3
+    CommSys -->|read| shm3
