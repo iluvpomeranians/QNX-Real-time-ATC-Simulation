@@ -5,6 +5,7 @@ ComputerSystem/computer_system
 # Momentics user settings files
 .settings/
 .metadata/
+*.prefs
 
 # Ignore any build artifacts
 *.o
@@ -49,4 +50,3 @@ vm1/
 vm2/
 .qnx_vm/
 .qnx_sdp/
-/.metadata/

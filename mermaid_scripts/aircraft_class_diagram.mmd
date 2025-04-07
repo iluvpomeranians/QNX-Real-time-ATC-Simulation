@@ -1,0 +1,87 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+direction TB
+    class AirspaceSharedMemory {
+	    +int aircraft_count
+	    +AircraftData aircraft_data[100]
+    }
+    class AircraftData {
+	    +int id
+	    +int entryTime
+	    +float x
+	    +float y
+	    +float z
+	    +float speedX
+	    +float speedY
+	    +float speedZ
+    }
+    class Aircraft {
+	    -int entryTime
+	    -int lastupdatedTime
+	    -int id
+	    -double x
+	    -double y
+	    -double z
+	    -double speedX
+	    -double speedY
+	    -double speedZ
+	    -bool running
+	    -attach
+	    -char service_name[256]
+	    -position_thread
+	    -ipc_thread
+	    -int shm_index
+	    @@ static Airspace* shared_memory
+	    @@ static int aircraft_index
+	    +Aircraft(int, int, double, double, double, double, double, double, Airspace*)
+	    +void startThreads()
+	    +void stopThreads()
+	    +~Aircraft()
+	    +void send_terminator_message()
+	    +void handle_operator_message(int, OperatorCommand*)
+	    +void handle_radar_message(int, RadarMessage*)
+	    +static void* updatePositionThread(void*)
+	    +static void* messageHandlerThread(void*)
+    }
+    class AircraftManager {
+	    +aircraft_queue
+	    +active_aircrafts
+	    +load_aircraft_data_from_file()
+	    +init_shared_memory()
+	    +spawn_aircrafts_by_time()
+	    +verify_aircraft_data()
+    }
+    class OperatorCommand {
+    }
+    class RadarMessage {
+    }
+    class TerminatorMessage {
+    }
+    class RadarReply {
+    }
+    class message_t {
+	    +int type
+	    +int aircraft_id
+	    +union
+	    + OperatorCommand operator_command
+	    + RadarMessage radar_message
+	    + TerminatorMessage terminator_message
+    }
+    class Lock {
+    }
+
+    Aircraft --> AirspaceSharedMemory : writes to aircraft_data
+    Aircraft --> AircraftData : updates
+    AircraftManager --> Aircraft : spawns
+    AirspaceSharedMemory "1" *-- "100" AircraftData : contains
+    AircraftManager "1" *-- "*" Aircraft : manages
+    Aircraft --> OperatorCommand
+    Aircraft --> RadarMessage
+    Aircraft --> TerminatorMessage
+    Aircraft --> message_t
+    Aircraft --> RadarReply
+    AirspaceSharedMemory "1" o-- "1" Lock : lock
