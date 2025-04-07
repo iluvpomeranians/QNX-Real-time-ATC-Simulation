@@ -7,16 +7,19 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <csignal>
+#include <sys/dispatch.h>
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
 #include "../../DataTypes/communication_system.h"
+#include "../../DataTypes/timing_logger.h"
 
 #define FUTURE_OFFSET_SEC 120
 Airspace* airspace;
 OperatorCommandMemory* operator_cmd_mem = nullptr;
 bool operator_cmd_initialized = false;
 bool commands_available = false;
+TimingLogger logger("violation_check.txt");
 
 int comm_system_pid = -1;
 int operator_cmd_fd;
@@ -26,6 +29,7 @@ struct ViolationArgs {
     int total_aircraft;
     double elapsedTime;
 };
+
 
 OperatorCommandMemory* init_operator_command_memory() {
 
@@ -67,6 +71,7 @@ void* pollOperatorCommands(void* arg) {
 
     int comm_fd;
     void* addr = MAP_FAILED;
+    struct timespec wait_time = {1, 0};  // 1 second
 
     std::cout << "[ComputerSystem] Waiting for CommunicationCommand shared memory to become available...\n";
 
@@ -83,7 +88,8 @@ void* pollOperatorCommands(void* arg) {
                 close(comm_fd);
             }
         }
-        sleep(1);
+        nanosleep(&wait_time, NULL);
+
     }
 
     CommunicationCommandMemory* comm_mem = static_cast<CommunicationCommandMemory*>(addr);
@@ -109,33 +115,31 @@ void* pollOperatorCommands(void* arg) {
                    cmd.type,
                    cmd.position.x, cmd.position.y, cmd.position.z,
                    cmd.speed.vx, cmd.speed.vy, cmd.speed.vz);
-            
-            // TODO: Clear command list after processing?
-            // We'll probably want to send to a Logger prior to deletion
+
             comm_mem->command_count+=1;
             pthread_mutex_unlock(&comm_mem->lock);
+
             // Set commands_available to true after storing the command
             commands_available = true;
         }
 
-        //TODO: add a && bolean_value to indicate that commands are available
         if (commands_available && comm_system_pid > 0) {
             std::cout << "[ComputerSystem] Sending SIGUSR1 to PID " << comm_system_pid << "...\n";
-            kill(comm_system_pid, SIGUSR1);
-        } if (kill(comm_system_pid, SIGUSR1) == -1) {
-            perror("[ComputerSystem] Error sending SIGUSR1");
-        }
+            if (kill(comm_system_pid, SIGUSR1) == -1) {
+                 perror("[ComputerSystem] Error sending SIGUSR1");
+            }
 
-        //TODO: check size of command array and then set command count to 0
+            cmd_mem->command_count = 0;
+            commands_available = false;
+        }
 
         pthread_mutex_unlock(&cmd_mem->lock);
 
-        sleep(1);
+        nanosleep(&wait_time, NULL);
+
     }
 
-    cmd_mem->command_count = 0;
 
-    commands_available = false;
 
     return NULL;
 }
@@ -144,6 +148,7 @@ void* pollOperatorCommands(void* arg) {
 Airspace* init_airspace_shared_memory() {
     int shm_fd;
     void* addr = MAP_FAILED;
+    struct timespec wait_time = {1, 0};  // 1 second
 
     printf("[ComputerSystem] Waiting for Airspace shared memory to become available...\n");
 
@@ -161,7 +166,8 @@ Airspace* init_airspace_shared_memory() {
             }
         }
 
-        sleep(1);
+        nanosleep(&wait_time, NULL);
+
     }
 }
 
@@ -169,15 +175,25 @@ Airspace* init_airspace_shared_memory() {
 
 
 void sendAlert(int aircraft1, int aircraft2) {
-//	std::cout << "[ALERT]: Aircraft " << aircraft1
-//	              << " and Aircraft " << aircraft2 << " are too close"
-//	              << std::endl;
-    // TODO: Implement alert mechanism (e.g., notify operator)
-}
+    char message[100];
+    snprintf(message, sizeof(message),
+             "ALERT: Aircraft %d and Aircraft %d are too close!", aircraft1, aircraft2);
 
-void sendIdToDisplay(int aircraft_id) {
-    std::cout << "DEBUG SEND ID: " << aircraft_id << std::endl;
-    // TODO: Implement display mechanism (e.g., show ID on screen)
+    int coid = name_open(OPERATOR_VIOLATIONS_CHANNEL_NAME, 0);
+    if (coid == -1) {
+        perror("[ComputerSystem] Failed to connect to OperatorConsole IPC channel");
+        return;
+    }
+
+    int status = MsgSend(coid, message, sizeof(message), NULL, 0);
+    if (status == -1) {
+        perror("[ComputerSystem] Failed to send alert to OperatorConsole");
+    } else {
+    	//TURN ON ALERTS
+        //std::cout << "[ComputerSystem] Alert sent to OperatorConsole: " << message << std::endl;
+    }
+
+    name_close(coid);
 }
 
 void getProjectedPosition(AircraftData& aircraft, double time) {
@@ -187,16 +203,14 @@ void getProjectedPosition(AircraftData& aircraft, double time) {
 }
 
 void* checkCurrentViolations(void* args) {
+	timespec start = logger.now();
     struct ViolationArgs* data = (struct ViolationArgs*) args;
     Airspace* l_airspace = data->shm_ptr;
 
-    // TODO: Use shared mem variable instead
     int max = data->total_aircraft;
 
     time_t now = time(NULL);
 
-    // TODO: Consider copying from shared memory and then releasing lock and
-    //       doing calculations after to not monopolize shm
     pthread_mutex_lock(&airspace->lock);
 
     for (int i = 0; i < max; i++) {
@@ -224,11 +238,15 @@ void* checkCurrentViolations(void* args) {
     }
 
     pthread_mutex_unlock(&airspace->lock);
+    timespec end = logger.now();
+    logger.logDuration("checkCurrentViolations", start, end);
+
     return NULL;
 }
 
 
 void* checkFutureViolations(void* args) {
+	timespec start = logger.now();
     struct ViolationArgs* data = (struct ViolationArgs*) args;
     Airspace* l_airspace = data->shm_ptr;
     int max = data->total_aircraft;
@@ -273,17 +291,20 @@ void* checkFutureViolations(void* args) {
     }
 
     pthread_mutex_unlock(&airspace->lock);
+    //usleep(5000); -- debug to see if timing is accounted for in logger
+    timespec end = logger.now();
+    logger.logDuration("checkFuturetViolations", start, end);
     return NULL;
 }
 
 
 void* violationCheck(void* arg) {
+
     struct timespec ts = {5, 0};
 
     std::cout << "[ComputerSystem] Checking Violations...\n";
 
     while (1) {
-
         struct ViolationArgs args = {
             .shm_ptr = airspace,
             .total_aircraft = MAX_AIRCRAFT,
@@ -296,6 +317,7 @@ void* violationCheck(void* arg) {
 
         pthread_join(currentThread, NULL);
         pthread_join(futureThread, NULL);
+
 
         nanosleep(&ts, NULL);
     }
@@ -346,7 +368,8 @@ int main() {
     pthread_t cmdThread;
     pthread_create(&cmdThread, NULL, pollOperatorCommands, operator_cmd_mem);
 
-    while (true) sleep(10);
+    struct timespec sleep_forever = {10, 0};
+    while (true) nanosleep(&sleep_forever, NULL);
 
     munmap(airspace, sizeof(Airspace));
     munmap(operator_cmd_mem, sizeof(OperatorCommandMemory));

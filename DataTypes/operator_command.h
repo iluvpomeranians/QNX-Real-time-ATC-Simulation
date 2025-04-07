@@ -7,6 +7,7 @@
 #define MAX_OPERATOR_COMMANDS 100
 #define OPERATOR_COMMAND_SHM_NAME "/operator_commands"
 #define OPERATOR_CONSOLE_CHANNEL_NAME "operator_console"
+#define OPERATOR_VIOLATIONS_CHANNEL_NAME "operator_violations"
 
 enum CommandType {
     ChangePosition,

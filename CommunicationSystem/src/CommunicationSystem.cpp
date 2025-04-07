@@ -30,6 +30,8 @@ void signal_handler(int signo) {
 
 OperatorCommandMemory* init_operator_command_memory() {
     int shm_fd;
+    struct timespec one_sec = {1, 0};  // 1 second, 0 nanoseconds
+
     while (true) {
         shm_fd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_RDWR, 0666);
         if (shm_fd != -1) {
@@ -45,11 +47,13 @@ OperatorCommandMemory* init_operator_command_memory() {
                 close(shm_fd);
             }
         }
-        sleep(1); // Retry if shm isn't ready yet
+        nanosleep(&one_sec, NULL);
     }
 }
 
 CommunicationCommandMemory* init_communication_command_memory() {
+    struct timespec one_sec = {1, 0};  // 1 second, 0 nanoseconds
+
     while (true) {
         comm_fd = shm_open(COMMUNICATION_COMMAND_SHM_NAME, O_CREAT | O_RDWR, 0666);
         if (comm_fd != -1) {
@@ -71,7 +75,7 @@ CommunicationCommandMemory* init_communication_command_memory() {
                 mem->command_count = 0;
 
                 std::cout << "[CommunicationSystem] Created and initialized CommunicationCommand shared memory.\n";
-                mem->comm_pid = getpid();//TODO: test this, print it, make sure its actually generating the PID
+                mem->comm_pid = getpid();
                 close(comm_fd);
                 return mem;
             } else {
@@ -79,7 +83,7 @@ CommunicationCommandMemory* init_communication_command_memory() {
                 close(comm_fd);
             }
         }
-        sleep(1);
+        nanosleep(&one_sec, NULL);
     }
 }
 
@@ -134,8 +138,6 @@ void* pollOperatorCommands(void* arg) {
             send_command_to_aircraft(cmd.aircraft_id, cmd);
         }
 
-        //TODO: We should run a size-check on commands[] arr to make sure it aligns
-        //with command count
         cmd_mem->command_count = 0;
 
         pthread_mutex_unlock(&cmd_mem->lock);
@@ -144,8 +146,7 @@ void* pollOperatorCommands(void* arg) {
     return NULL;
 }
 
-void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr,
-						   size_t size) {
+void cleanup_shared_memory(const char* shm_name, int shm_fd, void* addr, size_t size) {
 	if (munmap(addr, size) == 0) {
 		std::cout << "Shared memory unmapped successfully." << std::endl;
 	} else {
@@ -179,6 +180,7 @@ using namespace std;
 //Communicate via open channels to each aircraft
 int main() {
     setup_signal_handlers();
+    struct timespec one_sec = {1, 0};  // 1 second, 0 nanoseconds
 
     if (signal(SIGUSR1, signal_handler) == SIG_ERR) {
         perror("[CommunicationSystem] Failed to set signal handler");
@@ -191,7 +193,7 @@ int main() {
     pthread_t command_thread;
     pthread_create(&command_thread, NULL, pollOperatorCommands, operator_cmd_mem);
 
-    while (true) sleep(1);
+    while (true) nanosleep(&one_sec, NULL);
 
     return 0;
 }

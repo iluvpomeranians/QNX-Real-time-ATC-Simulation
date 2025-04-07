@@ -14,6 +14,7 @@
 #include "../../DataTypes/aircraft_data.h"
 #include "../../DataTypes/airspace.h"
 #include "../../DataTypes/operator_command.h"
+#include "../../DataTypes/timing_logger.h"
 
 #define AIRSPACE_WIDTH 100000
 #define AIRSPACE_HEIGHT 100000
@@ -23,6 +24,7 @@
 Airspace* airspace = nullptr;
 std::map<int, char> blipMap;
 int operator_coid = -1;
+TimingLogger logger("draw_display.txt");
 
 void clearScreen() {
     for (int i = 0; i < 24; ++i)
@@ -31,17 +33,19 @@ void clearScreen() {
 
 void connectToSharedMemory() {
     std::cout << "[DataDisplaySystem] Waiting for Airspace shared memory to be created...\n";
+    struct timespec wait_time = {1, 0};
+
     while (true) {
         int shm_fd = shm_open(AIRSPACE_SHM_NAME, O_RDONLY, 0666);
         if (shm_fd == -1) {
-            sleep(1);
+        	nanosleep(&wait_time, NULL);
             continue;
         }
 
         void* addr = mmap(nullptr, sizeof(Airspace), PROT_READ, MAP_SHARED, shm_fd, 0);
         if (addr == MAP_FAILED) {
             close(shm_fd);
-            sleep(1);
+            nanosleep(&wait_time, NULL);
             continue;
         }
 
@@ -72,8 +76,6 @@ void drawAirspace() {
 
     activeAircrafts.clear();
 
-    // TODO: Consider copying from shared memory and then releasing lock and
-    //       doing calculations after to not monopolize shm
     for (int i = 0; i < airspace->aircraft_count; ++i) {
         AircraftData& aircraft = airspace->aircraft_data[i];
 
@@ -170,11 +172,11 @@ void drawAirspace() {
   }
 
 void setupOperatorConsoleConnection() {
-	while ((operator_coid = name_open(OPERATOR_CONSOLE_CHANNEL_NAME, 0)) == -1) {
-		std::cout << "Waiting for server " << OPERATOR_CONSOLE_CHANNEL_NAME << "to start...\n";
+	std::cout << "Waiting for server " << OPERATOR_CONSOLE_CHANNEL_NAME << " to start...\n";
+	struct timespec wait_time = {1, 0};
 
-		// TODO: (Optional) Use better timer
-		sleep(0.5);
+	while ((operator_coid = name_open(OPERATOR_CONSOLE_CHANNEL_NAME, 0)) == -1) {
+		nanosleep(&wait_time, NULL);
 	}
 	std::cout << "Connected to server '" << OPERATOR_CONSOLE_CHANNEL_NAME << "'\n";
 
@@ -199,29 +201,39 @@ void promptAndSendCommand() {
 }
 
 void* commandInputThread(void*) {
+    struct timespec delay;
+    delay.tv_sec = 0;
+    delay.tv_nsec = 100000000;  // 100 ms = 100,000,000 ns
+
     while (true) {
         promptAndSendCommand();
-        usleep(100000);
+        nanosleep(&delay, NULL);
     }
     return nullptr;
 }
 
 
+
 int main() {
     connectToSharedMemory();
     setupOperatorConsoleConnection();
+    struct timespec delay;
+       delay.tv_sec = 0;
+       delay.tv_nsec = 100000000;
     std::time_t lastUpdate = 0;
     pthread_t inputThread;
     pthread_create(&inputThread, nullptr, commandInputThread, nullptr);
     while (true) {
         std::time_t now = std::time(nullptr);
         if (now - lastUpdate >= 1) {
-        	clearScreen();
+            clearScreen();
+            timespec start = logger.now();
             drawAirspace();
-//            promptAndSendCommand();
+            timespec end = logger.now();
+    		logger.logDuration("drawAirspace", start, end);
             lastUpdate = now;
         }
-        usleep(100000);
+        nanosleep(&delay, NULL);
     }
 
     return 0;
