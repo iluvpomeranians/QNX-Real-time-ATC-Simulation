@@ -24,13 +24,13 @@ pthread_t message_thread;
 
 Airspace* init_airspace_shared_memory() {
     std::cout << "[RadarSubsystem] Waiting for Airspace shared memory to become available...\n";
-
+    struct timespec wait_time = {1, 0};
     while (true) {
         shm_fd_airspace = shm_open(AIRSPACE_SHM_NAME, O_RDWR, 0666);
         if (shm_fd_airspace != -1) {
             break;
         }
-        sleep(1);
+        nanosleep(&wait_time, NULL);
     }
 
     void* addr = mmap(NULL, sizeof(Airspace), PROT_READ | PROT_WRITE,
@@ -44,10 +44,51 @@ Airspace* init_airspace_shared_memory() {
     return static_cast<Airspace*>(addr);
 }
 
+void clear_airspace_logfile() {
+    std::ofstream logfile("/tmp/airspace_history.txt", std::ios::trunc);
+    if (!logfile.is_open()) {
+        perror("[RadarSubsystem] Failed to clear airspace history log");
+        return;
+    }
+    logfile << "[RadarSubsystem] Airspace history log initialized.\n\n";
+    logfile.close();
+}
+
+
+void log_airspace_history() {
+    std::ofstream logfile("/tmp/airspace_history.txt", std::ios::app);
+    if (!logfile.is_open()) {
+        perror("[RadarSubsystem] Failed to open airspace history log");
+        return;
+    }
+
+    time_t now = time(NULL);
+    tm* timeinfo = localtime(&now);
+    char timeBuffer[64];
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    logfile << "=== Snapshot at " << timeBuffer << " ===\n";
+
+    for (int i = 0; i < airspace->aircraft_count; ++i) {
+        AircraftData& a = airspace->aircraft_data[i];
+        if (a.id == 0) continue;
+
+        logfile << "Aircraft " << a.id
+                << " | Pos: (" << a.x << ", " << a.y << ", " << a.z << ")"
+                << " | Vel: (" << a.speedX << ", " << a.speedY << ", " << a.speedZ << ")\n";
+    }
+
+    logfile << '\n';
+    logfile.close();
+}
+
+
 void* updateAirspaceDetectionThread(void* arg) {
 	struct timespec req;
 		    req.tv_sec = 1;         // 1 second
 		    req.tv_nsec = 0;        // 0 nanoseconds
+
+    time_t last_log_time = time(NULL);
 
 	while (true) {
 		pthread_mutex_lock(&airspace->lock);
@@ -75,6 +116,12 @@ void* updateAirspaceDetectionThread(void* arg) {
 				}
 			}
 		}
+
+		time_t now = time(NULL);
+		if (now - last_log_time >= 20) {
+			log_airspace_history();
+			last_log_time = now;
+		}
 		pthread_mutex_unlock(&airspace->lock);
 		nanosleep(&req, NULL);
 	}
@@ -86,6 +133,8 @@ void* send_message(void* arg) {
 
 	int coid;
 	char server_name[20];
+	struct timespec wait_time = {1, 0};
+
 	snprintf(server_name, sizeof(server_name), "Aircraft%d", id);
 
 	cout << "[DEBUG] server_name: " << server_name << endl;
@@ -93,7 +142,7 @@ void* send_message(void* arg) {
 	// Wait until the server becomes available
 	while ((coid = name_open(server_name, 0)) == -1) {
 		cout << "Waiting for server " << server_name << "to start...\n";
-		sleep(0.5);
+		nanosleep(&wait_time, NULL);
 	}
 	cout << "Connected to server '" << server_name << "'\n";
 
@@ -113,7 +162,6 @@ void* send_message(void* arg) {
         perror("MsgSend");
     }
 
-    // TODO: Do something with reply
     cout << fixed << setprecision(1);
 
     tm* timeinfo = localtime(&reply.timestamp);
@@ -139,6 +187,8 @@ void cleanUpOnExit() {
 }
 
 int main() {
+
+	clear_airspace_logfile();
 
     airspace = init_airspace_shared_memory();
 

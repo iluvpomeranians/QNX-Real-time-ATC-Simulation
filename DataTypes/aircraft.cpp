@@ -14,7 +14,6 @@
 Airspace* Aircraft::shared_memory = nullptr;
 int Aircraft::aircraft_index = 0;
 
-// TODO: Per-instance mutex for locking member values when reading/writing them
 Aircraft::Aircraft(time_t entryTime,
 				   int id,
 		           double x,
@@ -128,7 +127,7 @@ void Aircraft::startThreads(){
 	pthread_create(&ipc_thread, nullptr, messageHandlerThread, this);
 }
 
-// TODO: Delete prints
+
 void Aircraft::stopThreads() {
 	running = false;
 	pthread_join(position_thread, nullptr);
@@ -174,8 +173,7 @@ void Aircraft::handle_operator_message(int rcvid, OperatorCommand* cmd) {
 		std::cout << "[Aircraft] Speed updated to: (" << this->speedX << ", "
 				  << this->speedY << ", " << this->speedZ << ")" << std::endl;
 	} else if (cmd->type == CommandType::ChangePosition) {
-		//TODO: possibly revise
-		//This instantly changes the heading
+
 		Aircraft::shared_memory->aircraft_data[this->shm_index].x = cmd->position.x;
 		Aircraft::shared_memory->aircraft_data[this->shm_index].y = cmd->position.y;
 		Aircraft::shared_memory->aircraft_data[this->shm_index].z = cmd->position.z;
@@ -191,7 +189,6 @@ void Aircraft::handle_operator_message(int rcvid, OperatorCommand* cmd) {
 	}
 	pthread_mutex_unlock(&shared_memory->lock);
 
-	// TODO: Implement reply
 	MsgReply(rcvid, 0, NULL, 0);
 }
 

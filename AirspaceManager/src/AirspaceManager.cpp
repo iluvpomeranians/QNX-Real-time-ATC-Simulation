@@ -170,6 +170,9 @@ void verify_aircraft_data() {
 void spawn_aircrafts_by_time() {
     std::cout << "[Airspace Manager] Starting timed aircraft injection...\n";
     size_t nextAircraftIndex = 0;
+    struct timespec delay;
+        delay.tv_sec = 0;
+        delay.tv_nsec = 100000000;
 
     while (nextAircraftIndex < aircraft_queue.size()) {
         time_t currentTime = time(nullptr);
@@ -196,14 +199,13 @@ void spawn_aircrafts_by_time() {
             nextAircraftIndex++;
         }
 
-        usleep(100000);
+        nanosleep(&delay, NULL);
     }
 
     std::cout << "[Airspace Manager] All aircrafts injected.\n";
 }
 
 
-// TODO: Temporary function to start all the aircrafts after key press
 void start_aircrafts() {
 	for (Aircraft *a : active_aircrafts) {
 		a->startThreads();
@@ -233,9 +235,10 @@ void setup_signal_handlers() {
 int main() {
 	setup_signal_handlers();
 	airspace = init_shared_memory();
+	struct timespec wait_time = {1, 0};
 
 	load_aircraft_data_from_file("/tmp/aircraft_data.txt");
-	sleep(1);
+	nanosleep(&wait_time, NULL);
 	verify_aircraft_data();
 
 	cout << "\nIterating through aircraft data using shared memory limits:\n";

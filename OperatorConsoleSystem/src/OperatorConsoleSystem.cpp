@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 #include <cstring>
 #include <unistd.h>
@@ -26,6 +27,7 @@ name_attach_t* init_operator_violation_channel() {
 OperatorCommandMemory* connect_to_operator_command_memory() {
     int shm_fd;
     void* addr = MAP_FAILED;
+    struct timespec one_sec = {1, 0};  // 1 second, 0 nanoseconds
 
     while (true) {
         shm_fd = shm_open(OPERATOR_COMMAND_SHM_NAME, O_RDWR, 0666);
@@ -45,13 +47,45 @@ OperatorCommandMemory* connect_to_operator_command_memory() {
             perror("[OperatorConsole] shm_open failed (retrying)");
         }
 
-        sleep(1);
+
+        nanosleep(&one_sec, NULL);
+
     }
+}
+
+void clear_operator_logfile() {
+    std::ofstream logfile("/tmp/operator_history.txt", std::ios::trunc);
+    if (!logfile.is_open()) {
+        perror("[OperatorConsole] Failed to clear operator history log");
+        return;
+    }
+
+    logfile << "[OperatorConsole] Operator command log initialized.\n\n";
+    logfile.close();
+}
+
+
+void log_operator_command(const std::string& raw_cmd) {
+    std::ofstream logfile("/tmp/operator_history.txt", std::ios::app);
+    if (!logfile.is_open()) {
+        perror("[OperatorConsole] Failed to open operator history log");
+        return;
+    }
+
+    time_t now = time(NULL);
+    tm* timeinfo = localtime(&now);
+    char timeBuffer[64];
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    logfile << "[" << timeBuffer << "] " << raw_cmd << "\n";
+    logfile.close();
 }
 
 
 void handle_received_command(const std::string& raw_cmd) {
     const double UNSET = -1.0;
+
+    log_operator_command(raw_cmd);
 
     std::istringstream ss(raw_cmd);
     std::string type;
@@ -132,7 +166,7 @@ void* ipcListenerThread(void* arg) {
 
 
 int main() {
-
+	clear_operator_logfile();
     operator_cmd_mem = connect_to_operator_command_memory();
 
     // Attach channel

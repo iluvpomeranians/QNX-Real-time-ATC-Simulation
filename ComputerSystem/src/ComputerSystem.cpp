@@ -69,6 +69,7 @@ void* pollOperatorCommands(void* arg) {
 
     int comm_fd;
     void* addr = MAP_FAILED;
+    struct timespec wait_time = {1, 0};  // 1 second
 
     std::cout << "[ComputerSystem] Waiting for CommunicationCommand shared memory to become available...\n";
 
@@ -85,7 +86,8 @@ void* pollOperatorCommands(void* arg) {
                 close(comm_fd);
             }
         }
-        sleep(1);
+        nanosleep(&wait_time, NULL);
+
     }
 
     CommunicationCommandMemory* comm_mem = static_cast<CommunicationCommandMemory*>(addr);
@@ -111,9 +113,7 @@ void* pollOperatorCommands(void* arg) {
                    cmd.type,
                    cmd.position.x, cmd.position.y, cmd.position.z,
                    cmd.speed.vx, cmd.speed.vy, cmd.speed.vz);
-            
-            // TODO: Clear command list after processing?
-            // We'll probably want to send to a Logger prior to deletion
+
             comm_mem->command_count+=1;
             pthread_mutex_unlock(&comm_mem->lock);
 
@@ -133,7 +133,8 @@ void* pollOperatorCommands(void* arg) {
 
         pthread_mutex_unlock(&cmd_mem->lock);
 
-        sleep(1);
+        nanosleep(&wait_time, NULL);
+
     }
 
 
@@ -145,6 +146,7 @@ void* pollOperatorCommands(void* arg) {
 Airspace* init_airspace_shared_memory() {
     int shm_fd;
     void* addr = MAP_FAILED;
+    struct timespec wait_time = {1, 0};  // 1 second
 
     printf("[ComputerSystem] Waiting for Airspace shared memory to become available...\n");
 
@@ -162,7 +164,8 @@ Airspace* init_airspace_shared_memory() {
             }
         }
 
-        sleep(1);
+        nanosleep(&wait_time, NULL);
+
     }
 }
 
@@ -191,12 +194,6 @@ void sendAlert(int aircraft1, int aircraft2) {
     name_close(coid);
 }
 
-
-void sendIdToDisplay(int aircraft_id) {
-    std::cout << "DEBUG SEND ID: " << aircraft_id << std::endl;
-    // TODO: Implement display mechanism (e.g., show ID on screen)
-}
-
 void getProjectedPosition(AircraftData& aircraft, double time) {
     aircraft.x += aircraft.speedX * time / 3600;
     aircraft.y += aircraft.speedY * time / 3600;
@@ -207,13 +204,10 @@ void* checkCurrentViolations(void* args) {
     struct ViolationArgs* data = (struct ViolationArgs*) args;
     Airspace* l_airspace = data->shm_ptr;
 
-    // TODO: Use shared mem variable instead
     int max = data->total_aircraft;
 
     time_t now = time(NULL);
 
-    // TODO: Consider copying from shared memory and then releasing lock and
-    //       doing calculations after to not monopolize shm
     pthread_mutex_lock(&airspace->lock);
 
     for (int i = 0; i < max; i++) {
@@ -363,7 +357,8 @@ int main() {
     pthread_t cmdThread;
     pthread_create(&cmdThread, NULL, pollOperatorCommands, operator_cmd_mem);
 
-    while (true) sleep(10);
+    struct timespec sleep_forever = {10, 0};
+    while (true) nanosleep(&sleep_forever, NULL);
 
     munmap(airspace, sizeof(Airspace));
     munmap(operator_cmd_mem, sizeof(OperatorCommandMemory));
