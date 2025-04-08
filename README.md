@@ -1,4 +1,4 @@
-# COEN320 Air Traffic Control System
+# QNX Air Traffic Control System
 
 This project is an **air traffic control (ATC) simulation** developed for COEN320. It models real-time aircraft monitoring and safety violation detection using **QNX RTOS**. The system consists of multiple subsystems that communicate using **POSIX shared memory (shm_open, mmap)**.
 
