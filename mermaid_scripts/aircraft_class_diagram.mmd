@@ -7,7 +7,9 @@ classDiagram
 direction TB
 
 class AirspaceSharedMemory {
+    +pthread_mutex_t lock
     +int aircraft_count
+    +bool updated
     +AircraftData aircraft_data[100]
 }
 
